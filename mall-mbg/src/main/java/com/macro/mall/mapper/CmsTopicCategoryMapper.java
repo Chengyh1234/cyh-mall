@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.CmsTopicCategory;
-import com.macro.mall.model.CmsTopicCategoryExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface CmsTopicCategoryMapper {
-    long countByExample(CmsTopicCategoryExample example);
+/**
+ * <p>
+ * 话题分类表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface CmsTopicCategoryMapper extends BaseMapper<CmsTopicCategory> {
 
-    int deleteByExample(CmsTopicCategoryExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(CmsTopicCategory row);
-
-    int insertSelective(CmsTopicCategory row);
-
-    List<CmsTopicCategory> selectByExample(CmsTopicCategoryExample example);
-
-    CmsTopicCategory selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") CmsTopicCategory row, @Param("example") CmsTopicCategoryExample example);
-
-    int updateByExample(@Param("row") CmsTopicCategory row, @Param("example") CmsTopicCategoryExample example);
-
-    int updateByPrimaryKeySelective(CmsTopicCategory row);
-
-    int updateByPrimaryKey(CmsTopicCategory row);
 }

@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.PmsAlbum;
-import com.macro.mall.model.PmsAlbumExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface PmsAlbumMapper {
-    long countByExample(PmsAlbumExample example);
+/**
+ * <p>
+ * 相册表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface PmsAlbumMapper extends BaseMapper<PmsAlbum> {
 
-    int deleteByExample(PmsAlbumExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(PmsAlbum row);
-
-    int insertSelective(PmsAlbum row);
-
-    List<PmsAlbum> selectByExample(PmsAlbumExample example);
-
-    PmsAlbum selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") PmsAlbum row, @Param("example") PmsAlbumExample example);
-
-    int updateByExample(@Param("row") PmsAlbum row, @Param("example") PmsAlbumExample example);
-
-    int updateByPrimaryKeySelective(PmsAlbum row);
-
-    int updateByPrimaryKey(PmsAlbum row);
 }

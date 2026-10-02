@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.UmsMemberLevel;
-import com.macro.mall.model.UmsMemberLevelExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface UmsMemberLevelMapper {
-    long countByExample(UmsMemberLevelExample example);
+/**
+ * <p>
+ * 会员等级表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface UmsMemberLevelMapper extends BaseMapper<UmsMemberLevel> {
 
-    int deleteByExample(UmsMemberLevelExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(UmsMemberLevel row);
-
-    int insertSelective(UmsMemberLevel row);
-
-    List<UmsMemberLevel> selectByExample(UmsMemberLevelExample example);
-
-    UmsMemberLevel selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") UmsMemberLevel row, @Param("example") UmsMemberLevelExample example);
-
-    int updateByExample(@Param("row") UmsMemberLevel row, @Param("example") UmsMemberLevelExample example);
-
-    int updateByPrimaryKeySelective(UmsMemberLevel row);
-
-    int updateByPrimaryKey(UmsMemberLevel row);
 }

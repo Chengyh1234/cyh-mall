@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.UmsResource;
-import com.macro.mall.model.UmsResourceExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface UmsResourceMapper {
-    long countByExample(UmsResourceExample example);
+/**
+ * <p>
+ * 后台资源表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface UmsResourceMapper extends BaseMapper<UmsResource> {
 
-    int deleteByExample(UmsResourceExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(UmsResource row);
-
-    int insertSelective(UmsResource row);
-
-    List<UmsResource> selectByExample(UmsResourceExample example);
-
-    UmsResource selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") UmsResource row, @Param("example") UmsResourceExample example);
-
-    int updateByExample(@Param("row") UmsResource row, @Param("example") UmsResourceExample example);
-
-    int updateByPrimaryKeySelective(UmsResource row);
-
-    int updateByPrimaryKey(UmsResource row);
 }

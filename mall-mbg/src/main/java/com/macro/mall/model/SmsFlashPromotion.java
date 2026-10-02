@@ -1,91 +1,63 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 限时购表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("sms_flash_promotion")
 public class SmsFlashPromotion implements Serializable {
-    private Long id;
-
-    @Schema(title = "秒杀时间段名称")
-    private String title;
-
-    @Schema(title = "开始日期")
-    private Date startDate;
-
-    @Schema(title = "结束日期")
-    private Date endDate;
-
-    @Schema(title = "上下线状态")
-    private Integer status;
-
-    @Schema(title = "创建时间")
-    private Date createTime;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 秒杀时间段名称
+     */
+    @TableField("title")
+    private String title;
 
-    public String getTitle() {
-        return title;
-    }
+    /**
+     * 开始日期
+     */
+    @TableField("start_date")
+    private LocalDate startDate;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    /**
+     * 结束日期
+     */
+    @TableField("end_date")
+    private LocalDate endDate;
 
-    public Date getStartDate() {
-        return startDate;
-    }
+    /**
+     * 上下线状态
+     */
+    @TableField("status")
+    private Integer status;
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", title=").append(title);
-        sb.append(", startDate=").append(startDate);
-        sb.append(", endDate=").append(endDate);
-        sb.append(", status=").append(status);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private LocalDateTime createTime;
 }

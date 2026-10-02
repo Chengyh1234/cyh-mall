@@ -1,172 +1,95 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * <p>
+ * 会员等级表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_member_level")
 public class UmsMemberLevel implements Serializable {
-    private Long id;
-
-    private String name;
-
-    private Integer growthPoint;
-
-    @Schema(title = "是否为默认等级：0->不是；1->是")
-    private Integer defaultStatus;
-
-    @Schema(title = "免运费标准")
-    private BigDecimal freeFreightPoint;
-
-    @Schema(title = "每次评价获取的成长值")
-    private Integer commentGrowthPoint;
-
-    @Schema(title = "是否有免邮特权")
-    private Integer priviledgeFreeFreight;
-
-    @Schema(title = "是否有签到特权")
-    private Integer priviledgeSignIn;
-
-    @Schema(title = "是否有评论获奖励特权")
-    private Integer priviledgeComment;
-
-    @Schema(title = "是否有专享活动特权")
-    private Integer priviledgePromotion;
-
-    @Schema(title = "是否有会员价格特权")
-    private Integer priviledgeMemberPrice;
-
-    @Schema(title = "是否有生日特权")
-    private Integer priviledgeBirthday;
-
-    private String note;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("name")
+    private String name;
 
-    public String getName() {
-        return name;
-    }
+    @TableField("growth_point")
+    private Integer growthPoint;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    /**
+     * 是否为默认等级：0->不是；1->是
+     */
+    @TableField("default_status")
+    private Integer defaultStatus;
 
-    public Integer getGrowthPoint() {
-        return growthPoint;
-    }
+    /**
+     * 免运费标准
+     */
+    @TableField("free_freight_point")
+    private BigDecimal freeFreightPoint;
 
-    public void setGrowthPoint(Integer growthPoint) {
-        this.growthPoint = growthPoint;
-    }
+    /**
+     * 每次评价获取的成长值
+     */
+    @TableField("comment_growth_point")
+    private Integer commentGrowthPoint;
 
-    public Integer getDefaultStatus() {
-        return defaultStatus;
-    }
+    /**
+     * 是否有免邮特权
+     */
+    @TableField("priviledge_free_freight")
+    private Integer priviledgeFreeFreight;
 
-    public void setDefaultStatus(Integer defaultStatus) {
-        this.defaultStatus = defaultStatus;
-    }
+    /**
+     * 是否有签到特权
+     */
+    @TableField("priviledge_sign_in")
+    private Integer priviledgeSignIn;
 
-    public BigDecimal getFreeFreightPoint() {
-        return freeFreightPoint;
-    }
+    /**
+     * 是否有评论获奖励特权
+     */
+    @TableField("priviledge_comment")
+    private Integer priviledgeComment;
 
-    public void setFreeFreightPoint(BigDecimal freeFreightPoint) {
-        this.freeFreightPoint = freeFreightPoint;
-    }
+    /**
+     * 是否有专享活动特权
+     */
+    @TableField("priviledge_promotion")
+    private Integer priviledgePromotion;
 
-    public Integer getCommentGrowthPoint() {
-        return commentGrowthPoint;
-    }
+    /**
+     * 是否有会员价格特权
+     */
+    @TableField("priviledge_member_price")
+    private Integer priviledgeMemberPrice;
 
-    public void setCommentGrowthPoint(Integer commentGrowthPoint) {
-        this.commentGrowthPoint = commentGrowthPoint;
-    }
+    /**
+     * 是否有生日特权
+     */
+    @TableField("priviledge_birthday")
+    private Integer priviledgeBirthday;
 
-    public Integer getPriviledgeFreeFreight() {
-        return priviledgeFreeFreight;
-    }
-
-    public void setPriviledgeFreeFreight(Integer priviledgeFreeFreight) {
-        this.priviledgeFreeFreight = priviledgeFreeFreight;
-    }
-
-    public Integer getPriviledgeSignIn() {
-        return priviledgeSignIn;
-    }
-
-    public void setPriviledgeSignIn(Integer priviledgeSignIn) {
-        this.priviledgeSignIn = priviledgeSignIn;
-    }
-
-    public Integer getPriviledgeComment() {
-        return priviledgeComment;
-    }
-
-    public void setPriviledgeComment(Integer priviledgeComment) {
-        this.priviledgeComment = priviledgeComment;
-    }
-
-    public Integer getPriviledgePromotion() {
-        return priviledgePromotion;
-    }
-
-    public void setPriviledgePromotion(Integer priviledgePromotion) {
-        this.priviledgePromotion = priviledgePromotion;
-    }
-
-    public Integer getPriviledgeMemberPrice() {
-        return priviledgeMemberPrice;
-    }
-
-    public void setPriviledgeMemberPrice(Integer priviledgeMemberPrice) {
-        this.priviledgeMemberPrice = priviledgeMemberPrice;
-    }
-
-    public Integer getPriviledgeBirthday() {
-        return priviledgeBirthday;
-    }
-
-    public void setPriviledgeBirthday(Integer priviledgeBirthday) {
-        this.priviledgeBirthday = priviledgeBirthday;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", growthPoint=").append(growthPoint);
-        sb.append(", defaultStatus=").append(defaultStatus);
-        sb.append(", freeFreightPoint=").append(freeFreightPoint);
-        sb.append(", commentGrowthPoint=").append(commentGrowthPoint);
-        sb.append(", priviledgeFreeFreight=").append(priviledgeFreeFreight);
-        sb.append(", priviledgeSignIn=").append(priviledgeSignIn);
-        sb.append(", priviledgeComment=").append(priviledgeComment);
-        sb.append(", priviledgePromotion=").append(priviledgePromotion);
-        sb.append(", priviledgeMemberPrice=").append(priviledgeMemberPrice);
-        sb.append(", priviledgeBirthday=").append(priviledgeBirthday);
-        sb.append(", note=").append(note);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    @TableField("note")
+    private String note;
 }

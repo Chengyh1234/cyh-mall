@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.PmsCommentReplay;
-import com.macro.mall.model.PmsCommentReplayExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface PmsCommentReplayMapper {
-    long countByExample(PmsCommentReplayExample example);
+/**
+ * <p>
+ * 产品评价回复表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface PmsCommentReplayMapper extends BaseMapper<PmsCommentReplay> {
 
-    int deleteByExample(PmsCommentReplayExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(PmsCommentReplay row);
-
-    int insertSelective(PmsCommentReplay row);
-
-    List<PmsCommentReplay> selectByExample(PmsCommentReplayExample example);
-
-    PmsCommentReplay selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") PmsCommentReplay row, @Param("example") PmsCommentReplayExample example);
-
-    int updateByExample(@Param("row") PmsCommentReplay row, @Param("example") PmsCommentReplayExample example);
-
-    int updateByPrimaryKeySelective(PmsCommentReplay row);
-
-    int updateByPrimaryKey(PmsCommentReplay row);
 }

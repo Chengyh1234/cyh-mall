@@ -1,113 +1,68 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 积分变化历史记录表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_integration_change_history")
 public class UmsIntegrationChangeHistory implements Serializable {
-    private Long id;
-
-    private Long memberId;
-
-    private Date createTime;
-
-    @Schema(title = "改变类型：0->增加；1->减少")
-    private Integer changeType;
-
-    @Schema(title = "积分改变数量")
-    private Integer changeCount;
-
-    @Schema(title = "操作人员")
-    private String operateMan;
-
-    @Schema(title = "操作备注")
-    private String operateNote;
-
-    @Schema(title = "积分来源：0->购物；1->管理员修改")
-    private Integer sourceType;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("member_id")
+    private Long memberId;
 
-    public Long getMemberId() {
-        return memberId;
-    }
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
+    /**
+     * 改变类型：0->增加；1->减少
+     */
+    @TableField("change_type")
+    private Integer changeType;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 积分改变数量
+     */
+    @TableField("change_count")
+    private Integer changeCount;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 操作人员
+     */
+    @TableField("operate_man")
+    private String operateMan;
 
-    public Integer getChangeType() {
-        return changeType;
-    }
+    /**
+     * 操作备注
+     */
+    @TableField("operate_note")
+    private String operateNote;
 
-    public void setChangeType(Integer changeType) {
-        this.changeType = changeType;
-    }
-
-    public Integer getChangeCount() {
-        return changeCount;
-    }
-
-    public void setChangeCount(Integer changeCount) {
-        this.changeCount = changeCount;
-    }
-
-    public String getOperateMan() {
-        return operateMan;
-    }
-
-    public void setOperateMan(String operateMan) {
-        this.operateMan = operateMan;
-    }
-
-    public String getOperateNote() {
-        return operateNote;
-    }
-
-    public void setOperateNote(String operateNote) {
-        this.operateNote = operateNote;
-    }
-
-    public Integer getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(Integer sourceType) {
-        this.sourceType = sourceType;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", memberId=").append(memberId);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", changeType=").append(changeType);
-        sb.append(", changeCount=").append(changeCount);
-        sb.append(", operateMan=").append(operateMan);
-        sb.append(", operateNote=").append(operateNote);
-        sb.append(", sourceType=").append(sourceType);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 积分来源：0->购物；1->管理员修改
+     */
+    @TableField("source_type")
+    private Integer sourceType;
 }

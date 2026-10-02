@@ -189,9 +189,9 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public int delete(Long id) {
-        int count = adminMapper.deleteByPrimaryKey(id);
         getCacheService().delAdmin(id);
         getCacheService().delResourceList(id);
+        int count = adminMapper.deleteByPrimaryKey(id);
         return count;
     }
 

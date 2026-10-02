@@ -1,54 +1,43 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 
+/**
+ * <p>
+ * 后台角色资源关系表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_role_resource_relation")
 public class UmsRoleResourceRelation implements Serializable {
-    private Long id;
-
-    @Schema(title = "角色ID")
-    private Long roleId;
-
-    @Schema(title = "资源ID")
-    private Long resourceId;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 角色ID
+     */
+    @TableField("role_id")
+    private Long roleId;
 
-    public Long getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
-    }
-
-    public Long getResourceId() {
-        return resourceId;
-    }
-
-    public void setResourceId(Long resourceId) {
-        this.resourceId = resourceId;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", roleId=").append(roleId);
-        sb.append(", resourceId=").append(resourceId);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 资源ID
+     */
+    @TableField("resource_id")
+    private Long resourceId;
 }

@@ -1,114 +1,71 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * <p>
+ * 商品限时购与商品关系表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("sms_flash_promotion_product_relation")
 public class SmsFlashPromotionProductRelation implements Serializable {
-    @Schema(title = "编号")
-    private Long id;
-
-    private Long flashPromotionId;
-
-    @Schema(title = "编号")
-    private Long flashPromotionSessionId;
-
-    private Long productId;
-
-    @Schema(title = "限时购价格")
-    private BigDecimal flashPromotionPrice;
-
-    @Schema(title = "限时购数量")
-    private Integer flashPromotionCount;
-
-    @Schema(title = "每人限购数量")
-    private Integer flashPromotionLimit;
-
-    @Schema(title = "排序")
-    private Integer sort;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    /**
+     * 编号
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("flash_promotion_id")
+    private Long flashPromotionId;
 
-    public Long getFlashPromotionId() {
-        return flashPromotionId;
-    }
+    /**
+     * 编号
+     */
+    @TableField("flash_promotion_session_id")
+    private Long flashPromotionSessionId;
 
-    public void setFlashPromotionId(Long flashPromotionId) {
-        this.flashPromotionId = flashPromotionId;
-    }
+    @TableField("product_id")
+    private Long productId;
 
-    public Long getFlashPromotionSessionId() {
-        return flashPromotionSessionId;
-    }
+    /**
+     * 限时购价格
+     */
+    @TableField("flash_promotion_price")
+    private BigDecimal flashPromotionPrice;
 
-    public void setFlashPromotionSessionId(Long flashPromotionSessionId) {
-        this.flashPromotionSessionId = flashPromotionSessionId;
-    }
+    /**
+     * 限时购数量
+     */
+    @TableField("flash_promotion_count")
+    private Integer flashPromotionCount;
 
-    public Long getProductId() {
-        return productId;
-    }
+    /**
+     * 每人限购数量
+     */
+    @TableField("flash_promotion_limit")
+    private Integer flashPromotionLimit;
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public BigDecimal getFlashPromotionPrice() {
-        return flashPromotionPrice;
-    }
-
-    public void setFlashPromotionPrice(BigDecimal flashPromotionPrice) {
-        this.flashPromotionPrice = flashPromotionPrice;
-    }
-
-    public Integer getFlashPromotionCount() {
-        return flashPromotionCount;
-    }
-
-    public void setFlashPromotionCount(Integer flashPromotionCount) {
-        this.flashPromotionCount = flashPromotionCount;
-    }
-
-    public Integer getFlashPromotionLimit() {
-        return flashPromotionLimit;
-    }
-
-    public void setFlashPromotionLimit(Integer flashPromotionLimit) {
-        this.flashPromotionLimit = flashPromotionLimit;
-    }
-
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", flashPromotionId=").append(flashPromotionId);
-        sb.append(", flashPromotionSessionId=").append(flashPromotionSessionId);
-        sb.append(", productId=").append(productId);
-        sb.append(", flashPromotionPrice=").append(flashPromotionPrice);
-        sb.append(", flashPromotionCount=").append(flashPromotionCount);
-        sb.append(", flashPromotionLimit=").append(flashPromotionLimit);
-        sb.append(", sort=").append(sort);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 排序
+     */
+    @TableField("sort")
+    private Integer sort;
 }

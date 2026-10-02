@@ -1,91 +1,62 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 后台资源表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_resource")
 public class UmsResource implements Serializable {
-    private Long id;
-
-    @Schema(title = "创建时间")
-    private Date createTime;
-
-    @Schema(title = "资源名称")
-    private String name;
-
-    @Schema(title = "资源URL")
-    private String url;
-
-    @Schema(title = "描述")
-    private String description;
-
-    @Schema(title = "资源分类ID")
-    private Long categoryId;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 资源名称
+     */
+    @TableField("name")
+    private String name;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 资源URL
+     */
+    @TableField("url")
+    private String url;
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * 描述
+     */
+    @TableField("description")
+    private String description;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", name=").append(name);
-        sb.append(", url=").append(url);
-        sb.append(", description=").append(description);
-        sb.append(", categoryId=").append(categoryId);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 资源分类ID
+     */
+    @TableField("category_id")
+    private Long categoryId;
 }

@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.UmsGrowthChangeHistory;
-import com.macro.mall.model.UmsGrowthChangeHistoryExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface UmsGrowthChangeHistoryMapper {
-    long countByExample(UmsGrowthChangeHistoryExample example);
+/**
+ * <p>
+ * 成长值变化历史记录表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface UmsGrowthChangeHistoryMapper extends BaseMapper<UmsGrowthChangeHistory> {
 
-    int deleteByExample(UmsGrowthChangeHistoryExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(UmsGrowthChangeHistory row);
-
-    int insertSelective(UmsGrowthChangeHistory row);
-
-    List<UmsGrowthChangeHistory> selectByExample(UmsGrowthChangeHistoryExample example);
-
-    UmsGrowthChangeHistory selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") UmsGrowthChangeHistory row, @Param("example") UmsGrowthChangeHistoryExample example);
-
-    int updateByExample(@Param("row") UmsGrowthChangeHistory row, @Param("example") UmsGrowthChangeHistoryExample example);
-
-    int updateByPrimaryKeySelective(UmsGrowthChangeHistory row);
-
-    int updateByPrimaryKey(UmsGrowthChangeHistory row);
 }

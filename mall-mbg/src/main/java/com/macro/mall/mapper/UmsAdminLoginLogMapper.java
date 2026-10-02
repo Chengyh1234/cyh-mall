@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.UmsAdminLoginLog;
-import com.macro.mall.model.UmsAdminLoginLogExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface UmsAdminLoginLogMapper {
-    long countByExample(UmsAdminLoginLogExample example);
+/**
+ * <p>
+ * 后台用户登录日志表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface UmsAdminLoginLogMapper extends BaseMapper<UmsAdminLoginLog> {
 
-    int deleteByExample(UmsAdminLoginLogExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(UmsAdminLoginLog row);
-
-    int insertSelective(UmsAdminLoginLog row);
-
-    List<UmsAdminLoginLog> selectByExample(UmsAdminLoginLogExample example);
-
-    UmsAdminLoginLog selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") UmsAdminLoginLog row, @Param("example") UmsAdminLoginLogExample example);
-
-    int updateByExample(@Param("row") UmsAdminLoginLog row, @Param("example") UmsAdminLoginLogExample example);
-
-    int updateByPrimaryKeySelective(UmsAdminLoginLog row);
-
-    int updateByPrimaryKey(UmsAdminLoginLog row);
 }

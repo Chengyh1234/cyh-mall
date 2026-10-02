@@ -1,76 +1,49 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 
+/**
+ * <p>
+ * 优惠券和产品的关系表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("sms_coupon_product_relation")
 public class SmsCouponProductRelation implements Serializable {
-    private Long id;
-
-    private Long couponId;
-
-    private Long productId;
-
-    @Schema(title = "商品名称")
-    private String productName;
-
-    @Schema(title = "商品编码")
-    private String productSn;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("coupon_id")
+    private Long couponId;
 
-    public Long getCouponId() {
-        return couponId;
-    }
+    @TableField("product_id")
+    private Long productId;
 
-    public void setCouponId(Long couponId) {
-        this.couponId = couponId;
-    }
+    /**
+     * 商品名称
+     */
+    @TableField("product_name")
+    private String productName;
 
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public String getProductSn() {
-        return productSn;
-    }
-
-    public void setProductSn(String productSn) {
-        this.productSn = productSn;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", couponId=").append(couponId);
-        sb.append(", productId=").append(productId);
-        sb.append(", productName=").append(productName);
-        sb.append(", productSn=").append(productSn);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 商品编码
+     */
+    @TableField("product_sn")
+    private String productSn;
 }

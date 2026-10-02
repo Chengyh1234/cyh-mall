@@ -1,127 +1,80 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 后台菜单表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_menu")
 public class UmsMenu implements Serializable {
-    private Long id;
-
-    @Schema(title = "父级ID")
-    private Long parentId;
-
-    @Schema(title = "创建时间")
-    private Date createTime;
-
-    @Schema(title = "菜单名称")
-    private String title;
-
-    @Schema(title = "菜单级数")
-    private Integer level;
-
-    @Schema(title = "菜单排序")
-    private Integer sort;
-
-    @Schema(title = "前端名称")
-    private String name;
-
-    @Schema(title = "前端图标")
-    private String icon;
-
-    @Schema(title = "前端隐藏")
-    private Integer hidden;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 父级ID
+     */
+    @TableField("parent_id")
+    private Long parentId;
 
-    public Long getParentId() {
-        return parentId;
-    }
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
+    /**
+     * 菜单名称
+     */
+    @TableField("title")
+    private String title;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 菜单级数
+     */
+    @TableField("level")
+    private Integer level;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 菜单排序
+     */
+    @TableField("sort")
+    private Integer sort;
 
-    public String getTitle() {
-        return title;
-    }
+    /**
+     * 前端名称
+     */
+    @TableField("name")
+    private String name;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    /**
+     * 前端图标
+     */
+    @TableField("icon")
+    private String icon;
 
-    public Integer getLevel() {
-        return level;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
-
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public Integer getHidden() {
-        return hidden;
-    }
-
-    public void setHidden(Integer hidden) {
-        this.hidden = hidden;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", parentId=").append(parentId);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", title=").append(title);
-        sb.append(", level=").append(level);
-        sb.append(", sort=").append(sort);
-        sb.append(", name=").append(name);
-        sb.append(", icon=").append(icon);
-        sb.append(", hidden=").append(hidden);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 前端隐藏
+     */
+    @TableField("hidden")
+    private Integer hidden;
 }

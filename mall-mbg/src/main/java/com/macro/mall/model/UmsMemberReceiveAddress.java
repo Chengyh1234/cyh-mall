@@ -1,136 +1,79 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 
+/**
+ * <p>
+ * 会员收货地址表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_member_receive_address")
 public class UmsMemberReceiveAddress implements Serializable {
-    private Long id;
-
-    private Long memberId;
-
-    @Schema(title = "收货人名称")
-    private String name;
-
-    private String phoneNumber;
-
-    @Schema(title = "是否为默认")
-    private Integer defaultStatus;
-
-    @Schema(title = "邮政编码")
-    private String postCode;
-
-    @Schema(title = "省份/直辖市")
-    private String province;
-
-    @Schema(title = "城市")
-    private String city;
-
-    @Schema(title = "区")
-    private String region;
-
-    @Schema(title = "详细地址(街道)")
-    private String detailAddress;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("member_id")
+    private Long memberId;
 
-    public Long getMemberId() {
-        return memberId;
-    }
+    /**
+     * 收货人名称
+     */
+    @TableField("name")
+    private String name;
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
+    @TableField("phone_number")
+    private String phoneNumber;
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * 是否为默认
+     */
+    @TableField("default_status")
+    private Integer defaultStatus;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    /**
+     * 邮政编码
+     */
+    @TableField("post_code")
+    private String postCode;
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
+    /**
+     * 省份/直辖市
+     */
+    @TableField("province")
+    private String province;
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
+    /**
+     * 城市
+     */
+    @TableField("city")
+    private String city;
 
-    public Integer getDefaultStatus() {
-        return defaultStatus;
-    }
+    /**
+     * 区
+     */
+    @TableField("region")
+    private String region;
 
-    public void setDefaultStatus(Integer defaultStatus) {
-        this.defaultStatus = defaultStatus;
-    }
-
-    public String getPostCode() {
-        return postCode;
-    }
-
-    public void setPostCode(String postCode) {
-        this.postCode = postCode;
-    }
-
-    public String getProvince() {
-        return province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public String getDetailAddress() {
-        return detailAddress;
-    }
-
-    public void setDetailAddress(String detailAddress) {
-        this.detailAddress = detailAddress;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", memberId=").append(memberId);
-        sb.append(", name=").append(name);
-        sb.append(", phoneNumber=").append(phoneNumber);
-        sb.append(", defaultStatus=").append(defaultStatus);
-        sb.append(", postCode=").append(postCode);
-        sb.append(", province=").append(province);
-        sb.append(", city=").append(city);
-        sb.append(", region=").append(region);
-        sb.append(", detailAddress=").append(detailAddress);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 详细地址(街道)
+     */
+    @TableField("detail_address")
+    private String detailAddress;
 }

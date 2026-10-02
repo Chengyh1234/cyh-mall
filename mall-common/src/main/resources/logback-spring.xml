@@ -191,9 +191,13 @@
                 <appender-ref ref="LOG_STASH_DEBUG"/>
                 <appender-ref ref="LOG_STASH_ERROR"/>
             </root>
+            <!--LOG_STASH_RECORD 被绑定到名为 com.macro.mall.common.log.WebLogAspect 的 logger 上，
+            所以 只有 WebLogAspect 这个类打印的日志，会发送到这个 appender-->
             <logger name="com.macro.mall.common.log.WebLogAspect" level="DEBUG">
                 <appender-ref ref="LOG_STASH_RECORD"/>
             </logger>
+            <!--LOG_STASH_BUSINESS 被绑定到名为 com.macro.mall 的 logger 上，
+            所以 com.macro.mall 包及其子包下所有类的日志，都会发送到这个 appender-->
             <logger name="com.macro.mall" level="DEBUG">
                 <appender-ref ref="LOG_STASH_BUSINESS"/>
             </logger>

@@ -49,7 +49,7 @@ public class SecurityConfig {
         })
         //任何请求需要身份认证
         .authorizeHttpRequests(registry-> registry.anyRequest()
-            //有动态权限配置时添加动态权限管理器
+            //有动态权限配置时添加动态权限管理器  前台不进行这个校验
             .access(dynamicAuthorizationManager==null? AuthenticatedAuthorizationManager.authenticated():dynamicAuthorizationManager)
         )
         //关闭跨站请求防护

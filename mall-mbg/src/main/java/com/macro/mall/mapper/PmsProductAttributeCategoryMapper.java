@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.PmsProductAttributeCategory;
-import com.macro.mall.model.PmsProductAttributeCategoryExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface PmsProductAttributeCategoryMapper {
-    long countByExample(PmsProductAttributeCategoryExample example);
+/**
+ * <p>
+ * 产品属性分类表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface PmsProductAttributeCategoryMapper extends BaseMapper<PmsProductAttributeCategory> {
 
-    int deleteByExample(PmsProductAttributeCategoryExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(PmsProductAttributeCategory row);
-
-    int insertSelective(PmsProductAttributeCategory row);
-
-    List<PmsProductAttributeCategory> selectByExample(PmsProductAttributeCategoryExample example);
-
-    PmsProductAttributeCategory selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") PmsProductAttributeCategory row, @Param("example") PmsProductAttributeCategoryExample example);
-
-    int updateByExample(@Param("row") PmsProductAttributeCategory row, @Param("example") PmsProductAttributeCategoryExample example);
-
-    int updateByPrimaryKeySelective(PmsProductAttributeCategory row);
-
-    int updateByPrimaryKey(PmsProductAttributeCategory row);
 }

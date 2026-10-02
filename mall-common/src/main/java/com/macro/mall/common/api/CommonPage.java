@@ -1,6 +1,6 @@
 package com.macro.mall.common.api;
 
-import com.github.pagehelper.PageInfo;
+//import com.github.pagehelper.PageInfo;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -35,14 +35,15 @@ public class CommonPage<T> {
      * 将PageHelper分页后的list转为分页信息
      */
     public static <T> CommonPage<T> restPage(List<T> list) {
-        CommonPage<T> result = new CommonPage<T>();
-        PageInfo<T> pageInfo = new PageInfo<T>(list);
-        result.setTotalPage(pageInfo.getPages());
-        result.setPageNum(pageInfo.getPageNum());
-        result.setPageSize(pageInfo.getPageSize());
-        result.setTotal(pageInfo.getTotal());
-        result.setList(pageInfo.getList());
-        return result;
+        //CommonPage<T> result = new CommonPage<T>();
+        //PageInfo<T> pageInfo = new PageInfo<T>(list);
+        //result.setTotalPage(pageInfo.getPages());
+        //result.setPageNum(pageInfo.getPageNum());
+        //result.setPageSize(pageInfo.getPageSize());
+        //result.setTotal(pageInfo.getTotal());
+        //result.setList(pageInfo.getList());
+        //return result;
+        return null;
     }
 
     /**

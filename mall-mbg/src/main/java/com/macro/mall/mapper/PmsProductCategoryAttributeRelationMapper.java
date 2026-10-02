@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.PmsProductCategoryAttributeRelation;
-import com.macro.mall.model.PmsProductCategoryAttributeRelationExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface PmsProductCategoryAttributeRelationMapper {
-    long countByExample(PmsProductCategoryAttributeRelationExample example);
+/**
+ * <p>
+ * 产品的分类和属性的关系表，用于设置分类筛选条件（只支持一级分类） Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface PmsProductCategoryAttributeRelationMapper extends BaseMapper<PmsProductCategoryAttributeRelation> {
 
-    int deleteByExample(PmsProductCategoryAttributeRelationExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(PmsProductCategoryAttributeRelation row);
-
-    int insertSelective(PmsProductCategoryAttributeRelation row);
-
-    List<PmsProductCategoryAttributeRelation> selectByExample(PmsProductCategoryAttributeRelationExample example);
-
-    PmsProductCategoryAttributeRelation selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") PmsProductCategoryAttributeRelation row, @Param("example") PmsProductCategoryAttributeRelationExample example);
-
-    int updateByExample(@Param("row") PmsProductCategoryAttributeRelation row, @Param("example") PmsProductCategoryAttributeRelationExample example);
-
-    int updateByPrimaryKeySelective(PmsProductCategoryAttributeRelation row);
-
-    int updateByPrimaryKey(PmsProductCategoryAttributeRelation row);
 }

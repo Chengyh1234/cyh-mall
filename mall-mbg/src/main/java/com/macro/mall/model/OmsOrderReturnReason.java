@@ -1,78 +1,53 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 退货原因表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("oms_order_return_reason")
 public class OmsOrderReturnReason implements Serializable {
-    private Long id;
-
-    @Schema(title = "退货类型")
-    private String name;
-
-    private Integer sort;
-
-    @Schema(title = "状态：0->不启用；1->启用")
-    private Integer status;
-
-    @Schema(title = "添加时间")
-    private Date createTime;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 退货类型
+     */
+    @TableField("name")
+    private String name;
 
-    public String getName() {
-        return name;
-    }
+    @TableField("sort")
+    private Integer sort;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    /**
+     * 状态：0->不启用；1->启用
+     */
+    @TableField("status")
+    private Integer status;
 
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", sort=").append(sort);
-        sb.append(", status=").append(status);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 添加时间
+     */
+    @TableField("create_time")
+    private LocalDateTime createTime;
 }

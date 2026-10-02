@@ -4,7 +4,6 @@ import com.macro.mall.validator.FlagValidator;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
 import jakarta.validation.constraints.NotEmpty;
 
 /**

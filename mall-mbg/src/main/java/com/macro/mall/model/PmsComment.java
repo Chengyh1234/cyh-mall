@@ -1,190 +1,89 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 商品评价表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("pms_comment")
 public class PmsComment implements Serializable {
-    private Long id;
-
-    private Long productId;
-
-    private String memberNickName;
-
-    private String productName;
-
-    @Schema(title = "评价星数：0->5")
-    private Integer star;
-
-    @Schema(title = "评价的ip")
-    private String memberIp;
-
-    private Date createTime;
-
-    private Integer showStatus;
-
-    @Schema(title = "购买时的商品属性")
-    private String productAttribute;
-
-    private Integer collectCouont;
-
-    private Integer readCount;
-
-    @Schema(title = "上传图片地址，以逗号隔开")
-    private String pics;
-
-    @Schema(title = "评论用户头像")
-    private String memberIcon;
-
-    private Integer replayCount;
-
-    private String content;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("product_id")
+    private Long productId;
 
-    public Long getProductId() {
-        return productId;
-    }
+    @TableField("member_nick_name")
+    private String memberNickName;
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
+    @TableField("product_name")
+    private String productName;
 
-    public String getMemberNickName() {
-        return memberNickName;
-    }
+    /**
+     * 评价星数：0->5
+     */
+    @TableField("star")
+    private Integer star;
 
-    public void setMemberNickName(String memberNickName) {
-        this.memberNickName = memberNickName;
-    }
+    /**
+     * 评价的ip
+     */
+    @TableField("member_ip")
+    private String memberIp;
 
-    public String getProductName() {
-        return productName;
-    }
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
+    @TableField("show_status")
+    private Integer showStatus;
 
-    public Integer getStar() {
-        return star;
-    }
+    /**
+     * 购买时的商品属性
+     */
+    @TableField("product_attribute")
+    private String productAttribute;
 
-    public void setStar(Integer star) {
-        this.star = star;
-    }
+    @TableField("collect_couont")
+    private Integer collectCouont;
 
-    public String getMemberIp() {
-        return memberIp;
-    }
+    @TableField("read_count")
+    private Integer readCount;
 
-    public void setMemberIp(String memberIp) {
-        this.memberIp = memberIp;
-    }
+    @TableField("content")
+    private String content;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 上传图片地址，以逗号隔开
+     */
+    @TableField("pics")
+    private String pics;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 评论用户头像
+     */
+    @TableField("member_icon")
+    private String memberIcon;
 
-    public Integer getShowStatus() {
-        return showStatus;
-    }
-
-    public void setShowStatus(Integer showStatus) {
-        this.showStatus = showStatus;
-    }
-
-    public String getProductAttribute() {
-        return productAttribute;
-    }
-
-    public void setProductAttribute(String productAttribute) {
-        this.productAttribute = productAttribute;
-    }
-
-    public Integer getCollectCouont() {
-        return collectCouont;
-    }
-
-    public void setCollectCouont(Integer collectCouont) {
-        this.collectCouont = collectCouont;
-    }
-
-    public Integer getReadCount() {
-        return readCount;
-    }
-
-    public void setReadCount(Integer readCount) {
-        this.readCount = readCount;
-    }
-
-    public String getPics() {
-        return pics;
-    }
-
-    public void setPics(String pics) {
-        this.pics = pics;
-    }
-
-    public String getMemberIcon() {
-        return memberIcon;
-    }
-
-    public void setMemberIcon(String memberIcon) {
-        this.memberIcon = memberIcon;
-    }
-
-    public Integer getReplayCount() {
-        return replayCount;
-    }
-
-    public void setReplayCount(Integer replayCount) {
-        this.replayCount = replayCount;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", productId=").append(productId);
-        sb.append(", memberNickName=").append(memberNickName);
-        sb.append(", productName=").append(productName);
-        sb.append(", star=").append(star);
-        sb.append(", memberIp=").append(memberIp);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", showStatus=").append(showStatus);
-        sb.append(", productAttribute=").append(productAttribute);
-        sb.append(", collectCouont=").append(collectCouont);
-        sb.append(", readCount=").append(readCount);
-        sb.append(", pics=").append(pics);
-        sb.append(", memberIcon=").append(memberIcon);
-        sb.append(", replayCount=").append(replayCount);
-        sb.append(", content=").append(content);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    @TableField("replay_count")
+    private Integer replayCount;
 }

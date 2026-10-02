@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.OmsOrder;
-import com.macro.mall.model.OmsOrderExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface OmsOrderMapper {
-    long countByExample(OmsOrderExample example);
+/**
+ * <p>
+ * 订单表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface OmsOrderMapper extends BaseMapper<OmsOrder> {
 
-    int deleteByExample(OmsOrderExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(OmsOrder row);
-
-    int insertSelective(OmsOrder row);
-
-    List<OmsOrder> selectByExample(OmsOrderExample example);
-
-    OmsOrder selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") OmsOrder row, @Param("example") OmsOrderExample example);
-
-    int updateByExample(@Param("row") OmsOrder row, @Param("example") OmsOrderExample example);
-
-    int updateByPrimaryKeySelective(OmsOrder row);
-
-    int updateByPrimaryKey(OmsOrder row);
 }

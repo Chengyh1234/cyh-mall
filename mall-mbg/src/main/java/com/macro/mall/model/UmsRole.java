@@ -1,102 +1,65 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 后台用户角色表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_role")
 public class UmsRole implements Serializable {
-    private Long id;
-
-    @Schema(title = "名称")
-    private String name;
-
-    @Schema(title = "描述")
-    private String description;
-
-    @Schema(title = "后台用户数量")
-    private Integer adminCount;
-
-    @Schema(title = "创建时间")
-    private Date createTime;
-
-    @Schema(title = "启用状态：0->禁用；1->启用")
-    private Integer status;
-
-    private Integer sort;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 名称
+     */
+    @TableField("name")
+    private String name;
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * 描述
+     */
+    @TableField("description")
+    private String description;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    /**
+     * 后台用户数量
+     */
+    @TableField("admin_count")
+    private Integer adminCount;
 
-    public String getDescription() {
-        return description;
-    }
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    /**
+     * 启用状态：0->禁用；1->启用
+     */
+    @TableField("status")
+    private Integer status;
 
-    public Integer getAdminCount() {
-        return adminCount;
-    }
-
-    public void setAdminCount(Integer adminCount) {
-        this.adminCount = adminCount;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", description=").append(description);
-        sb.append(", adminCount=").append(adminCount);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", status=").append(status);
-        sb.append(", sort=").append(sort);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    @TableField("sort")
+    private Integer sort;
 }

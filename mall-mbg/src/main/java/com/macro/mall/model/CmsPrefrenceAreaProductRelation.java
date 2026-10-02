@@ -1,52 +1,37 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 
+/**
+ * <p>
+ * 优选专区和产品关系表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("cms_prefrence_area_product_relation")
 public class CmsPrefrenceAreaProductRelation implements Serializable {
-    private Long id;
-
-    private Long prefrenceAreaId;
-
-    private Long productId;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("prefrence_area_id")
+    private Long prefrenceAreaId;
 
-    public Long getPrefrenceAreaId() {
-        return prefrenceAreaId;
-    }
-
-    public void setPrefrenceAreaId(Long prefrenceAreaId) {
-        this.prefrenceAreaId = prefrenceAreaId;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", prefrenceAreaId=").append(prefrenceAreaId);
-        sb.append(", productId=").append(productId);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    @TableField("product_id")
+    private Long productId;
 }

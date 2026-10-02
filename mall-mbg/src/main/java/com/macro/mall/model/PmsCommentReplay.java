@@ -1,98 +1,53 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 产品评价回复表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("pms_comment_replay")
 public class PmsCommentReplay implements Serializable {
-    private Long id;
-
-    private Long commentId;
-
-    private String memberNickName;
-
-    private String memberIcon;
-
-    private String content;
-
-    private Date createTime;
-
-    @Schema(title = "评论人员类型；0->会员；1->管理员")
-    private Integer type;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("comment_id")
+    private Long commentId;
 
-    public Long getCommentId() {
-        return commentId;
-    }
+    @TableField("member_nick_name")
+    private String memberNickName;
 
-    public void setCommentId(Long commentId) {
-        this.commentId = commentId;
-    }
+    @TableField("member_icon")
+    private String memberIcon;
 
-    public String getMemberNickName() {
-        return memberNickName;
-    }
+    @TableField("content")
+    private String content;
 
-    public void setMemberNickName(String memberNickName) {
-        this.memberNickName = memberNickName;
-    }
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public String getMemberIcon() {
-        return memberIcon;
-    }
-
-    public void setMemberIcon(String memberIcon) {
-        this.memberIcon = memberIcon;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", commentId=").append(commentId);
-        sb.append(", memberNickName=").append(memberNickName);
-        sb.append(", memberIcon=").append(memberIcon);
-        sb.append(", content=").append(content);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", type=").append(type);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 评论人员类型；0->会员；1->管理员
+     */
+    @TableField("type")
+    private Integer type;
 }

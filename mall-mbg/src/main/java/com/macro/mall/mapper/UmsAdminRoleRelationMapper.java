@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.UmsAdminRoleRelation;
-import com.macro.mall.model.UmsAdminRoleRelationExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface UmsAdminRoleRelationMapper {
-    long countByExample(UmsAdminRoleRelationExample example);
+/**
+ * <p>
+ * 后台用户和角色关系表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface UmsAdminRoleRelationMapper extends BaseMapper<UmsAdminRoleRelation> {
 
-    int deleteByExample(UmsAdminRoleRelationExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(UmsAdminRoleRelation row);
-
-    int insertSelective(UmsAdminRoleRelation row);
-
-    List<UmsAdminRoleRelation> selectByExample(UmsAdminRoleRelationExample example);
-
-    UmsAdminRoleRelation selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") UmsAdminRoleRelation row, @Param("example") UmsAdminRoleRelationExample example);
-
-    int updateByExample(@Param("row") UmsAdminRoleRelation row, @Param("example") UmsAdminRoleRelationExample example);
-
-    int updateByPrimaryKeySelective(UmsAdminRoleRelation row);
-
-    int updateByPrimaryKey(UmsAdminRoleRelation row);
 }

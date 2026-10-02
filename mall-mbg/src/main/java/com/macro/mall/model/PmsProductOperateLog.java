@@ -1,155 +1,72 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("pms_product_operate_log")
 public class PmsProductOperateLog implements Serializable {
-    private Long id;
-
-    private Long productId;
-
-    private BigDecimal priceOld;
-
-    private BigDecimal priceNew;
-
-    private BigDecimal salePriceOld;
-
-    private BigDecimal salePriceNew;
-
-    @Schema(title = "赠送的积分")
-    private Integer giftPointOld;
-
-    private Integer giftPointNew;
-
-    private Integer usePointLimitOld;
-
-    private Integer usePointLimitNew;
-
-    @Schema(title = "操作人")
-    private String operateMan;
-
-    private Date createTime;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("product_id")
+    private Long productId;
 
-    public Long getProductId() {
-        return productId;
-    }
+    @TableField("price_old")
+    private BigDecimal priceOld;
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
+    @TableField("price_new")
+    private BigDecimal priceNew;
 
-    public BigDecimal getPriceOld() {
-        return priceOld;
-    }
+    @TableField("sale_price_old")
+    private BigDecimal salePriceOld;
 
-    public void setPriceOld(BigDecimal priceOld) {
-        this.priceOld = priceOld;
-    }
+    @TableField("sale_price_new")
+    private BigDecimal salePriceNew;
 
-    public BigDecimal getPriceNew() {
-        return priceNew;
-    }
+    /**
+     * 赠送的积分
+     */
+    @TableField("gift_point_old")
+    private Integer giftPointOld;
 
-    public void setPriceNew(BigDecimal priceNew) {
-        this.priceNew = priceNew;
-    }
+    @TableField("gift_point_new")
+    private Integer giftPointNew;
 
-    public BigDecimal getSalePriceOld() {
-        return salePriceOld;
-    }
+    @TableField("use_point_limit_old")
+    private Integer usePointLimitOld;
 
-    public void setSalePriceOld(BigDecimal salePriceOld) {
-        this.salePriceOld = salePriceOld;
-    }
+    @TableField("use_point_limit_new")
+    private Integer usePointLimitNew;
 
-    public BigDecimal getSalePriceNew() {
-        return salePriceNew;
-    }
+    /**
+     * 操作人
+     */
+    @TableField("operate_man")
+    private String operateMan;
 
-    public void setSalePriceNew(BigDecimal salePriceNew) {
-        this.salePriceNew = salePriceNew;
-    }
-
-    public Integer getGiftPointOld() {
-        return giftPointOld;
-    }
-
-    public void setGiftPointOld(Integer giftPointOld) {
-        this.giftPointOld = giftPointOld;
-    }
-
-    public Integer getGiftPointNew() {
-        return giftPointNew;
-    }
-
-    public void setGiftPointNew(Integer giftPointNew) {
-        this.giftPointNew = giftPointNew;
-    }
-
-    public Integer getUsePointLimitOld() {
-        return usePointLimitOld;
-    }
-
-    public void setUsePointLimitOld(Integer usePointLimitOld) {
-        this.usePointLimitOld = usePointLimitOld;
-    }
-
-    public Integer getUsePointLimitNew() {
-        return usePointLimitNew;
-    }
-
-    public void setUsePointLimitNew(Integer usePointLimitNew) {
-        this.usePointLimitNew = usePointLimitNew;
-    }
-
-    public String getOperateMan() {
-        return operateMan;
-    }
-
-    public void setOperateMan(String operateMan) {
-        this.operateMan = operateMan;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", productId=").append(productId);
-        sb.append(", priceOld=").append(priceOld);
-        sb.append(", priceNew=").append(priceNew);
-        sb.append(", salePriceOld=").append(salePriceOld);
-        sb.append(", salePriceNew=").append(salePriceNew);
-        sb.append(", giftPointOld=").append(giftPointOld);
-        sb.append(", giftPointNew=").append(giftPointNew);
-        sb.append(", usePointLimitOld=").append(usePointLimitOld);
-        sb.append(", usePointLimitNew=").append(usePointLimitNew);
-        sb.append(", operateMan=").append(operateMan);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    @TableField("create_time")
+    private LocalDateTime createTime;
 }

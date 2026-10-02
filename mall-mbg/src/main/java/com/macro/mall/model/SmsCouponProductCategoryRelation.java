@@ -1,76 +1,49 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 
+/**
+ * <p>
+ * 优惠券和产品分类关系表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("sms_coupon_product_category_relation")
 public class SmsCouponProductCategoryRelation implements Serializable {
-    private Long id;
-
-    private Long couponId;
-
-    private Long productCategoryId;
-
-    @Schema(title = "产品分类名称")
-    private String productCategoryName;
-
-    @Schema(title = "父分类名称")
-    private String parentCategoryName;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("coupon_id")
+    private Long couponId;
 
-    public Long getCouponId() {
-        return couponId;
-    }
+    @TableField("product_category_id")
+    private Long productCategoryId;
 
-    public void setCouponId(Long couponId) {
-        this.couponId = couponId;
-    }
+    /**
+     * 产品分类名称
+     */
+    @TableField("product_category_name")
+    private String productCategoryName;
 
-    public Long getProductCategoryId() {
-        return productCategoryId;
-    }
-
-    public void setProductCategoryId(Long productCategoryId) {
-        this.productCategoryId = productCategoryId;
-    }
-
-    public String getProductCategoryName() {
-        return productCategoryName;
-    }
-
-    public void setProductCategoryName(String productCategoryName) {
-        this.productCategoryName = productCategoryName;
-    }
-
-    public String getParentCategoryName() {
-        return parentCategoryName;
-    }
-
-    public void setParentCategoryName(String parentCategoryName) {
-        this.parentCategoryName = parentCategoryName;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", couponId=").append(couponId);
-        sb.append(", productCategoryId=").append(productCategoryId);
-        sb.append(", productCategoryName=").append(productCategoryName);
-        sb.append(", parentCategoryName=").append(parentCategoryName);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 父分类名称
+     */
+    @TableField("parent_category_name")
+    private String parentCategoryName;
 }

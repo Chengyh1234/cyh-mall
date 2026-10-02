@@ -1,206 +1,105 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 会员统计信息
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_member_statistics_info")
 public class UmsMemberStatisticsInfo implements Serializable {
-    private Long id;
-
-    private Long memberId;
-
-    @Schema(title = "累计消费金额")
-    private BigDecimal consumeAmount;
-
-    @Schema(title = "订单数量")
-    private Integer orderCount;
-
-    @Schema(title = "优惠券数量")
-    private Integer couponCount;
-
-    @Schema(title = "评价数")
-    private Integer commentCount;
-
-    @Schema(title = "退货数量")
-    private Integer returnOrderCount;
-
-    @Schema(title = "登录次数")
-    private Integer loginCount;
-
-    @Schema(title = "关注数量")
-    private Integer attendCount;
-
-    @Schema(title = "粉丝数量")
-    private Integer fansCount;
-
-    private Integer collectProductCount;
-
-    private Integer collectSubjectCount;
-
-    private Integer collectTopicCount;
-
-    private Integer collectCommentCount;
-
-    private Integer inviteFriendCount;
-
-    @Schema(title = "最后一次下订单时间")
-    private Date recentOrderTime;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("member_id")
+    private Long memberId;
 
-    public Long getMemberId() {
-        return memberId;
-    }
+    /**
+     * 累计消费金额
+     */
+    @TableField("consume_amount")
+    private BigDecimal consumeAmount;
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
+    /**
+     * 订单数量
+     */
+    @TableField("order_count")
+    private Integer orderCount;
 
-    public BigDecimal getConsumeAmount() {
-        return consumeAmount;
-    }
+    /**
+     * 优惠券数量
+     */
+    @TableField("coupon_count")
+    private Integer couponCount;
 
-    public void setConsumeAmount(BigDecimal consumeAmount) {
-        this.consumeAmount = consumeAmount;
-    }
+    /**
+     * 评价数
+     */
+    @TableField("comment_count")
+    private Integer commentCount;
 
-    public Integer getOrderCount() {
-        return orderCount;
-    }
+    /**
+     * 退货数量
+     */
+    @TableField("return_order_count")
+    private Integer returnOrderCount;
 
-    public void setOrderCount(Integer orderCount) {
-        this.orderCount = orderCount;
-    }
+    /**
+     * 登录次数
+     */
+    @TableField("login_count")
+    private Integer loginCount;
 
-    public Integer getCouponCount() {
-        return couponCount;
-    }
+    /**
+     * 关注数量
+     */
+    @TableField("attend_count")
+    private Integer attendCount;
 
-    public void setCouponCount(Integer couponCount) {
-        this.couponCount = couponCount;
-    }
+    /**
+     * 粉丝数量
+     */
+    @TableField("fans_count")
+    private Integer fansCount;
 
-    public Integer getCommentCount() {
-        return commentCount;
-    }
+    @TableField("collect_product_count")
+    private Integer collectProductCount;
 
-    public void setCommentCount(Integer commentCount) {
-        this.commentCount = commentCount;
-    }
+    @TableField("collect_subject_count")
+    private Integer collectSubjectCount;
 
-    public Integer getReturnOrderCount() {
-        return returnOrderCount;
-    }
+    @TableField("collect_topic_count")
+    private Integer collectTopicCount;
 
-    public void setReturnOrderCount(Integer returnOrderCount) {
-        this.returnOrderCount = returnOrderCount;
-    }
+    @TableField("collect_comment_count")
+    private Integer collectCommentCount;
 
-    public Integer getLoginCount() {
-        return loginCount;
-    }
+    @TableField("invite_friend_count")
+    private Integer inviteFriendCount;
 
-    public void setLoginCount(Integer loginCount) {
-        this.loginCount = loginCount;
-    }
-
-    public Integer getAttendCount() {
-        return attendCount;
-    }
-
-    public void setAttendCount(Integer attendCount) {
-        this.attendCount = attendCount;
-    }
-
-    public Integer getFansCount() {
-        return fansCount;
-    }
-
-    public void setFansCount(Integer fansCount) {
-        this.fansCount = fansCount;
-    }
-
-    public Integer getCollectProductCount() {
-        return collectProductCount;
-    }
-
-    public void setCollectProductCount(Integer collectProductCount) {
-        this.collectProductCount = collectProductCount;
-    }
-
-    public Integer getCollectSubjectCount() {
-        return collectSubjectCount;
-    }
-
-    public void setCollectSubjectCount(Integer collectSubjectCount) {
-        this.collectSubjectCount = collectSubjectCount;
-    }
-
-    public Integer getCollectTopicCount() {
-        return collectTopicCount;
-    }
-
-    public void setCollectTopicCount(Integer collectTopicCount) {
-        this.collectTopicCount = collectTopicCount;
-    }
-
-    public Integer getCollectCommentCount() {
-        return collectCommentCount;
-    }
-
-    public void setCollectCommentCount(Integer collectCommentCount) {
-        this.collectCommentCount = collectCommentCount;
-    }
-
-    public Integer getInviteFriendCount() {
-        return inviteFriendCount;
-    }
-
-    public void setInviteFriendCount(Integer inviteFriendCount) {
-        this.inviteFriendCount = inviteFriendCount;
-    }
-
-    public Date getRecentOrderTime() {
-        return recentOrderTime;
-    }
-
-    public void setRecentOrderTime(Date recentOrderTime) {
-        this.recentOrderTime = recentOrderTime;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", memberId=").append(memberId);
-        sb.append(", consumeAmount=").append(consumeAmount);
-        sb.append(", orderCount=").append(orderCount);
-        sb.append(", couponCount=").append(couponCount);
-        sb.append(", commentCount=").append(commentCount);
-        sb.append(", returnOrderCount=").append(returnOrderCount);
-        sb.append(", loginCount=").append(loginCount);
-        sb.append(", attendCount=").append(attendCount);
-        sb.append(", fansCount=").append(fansCount);
-        sb.append(", collectProductCount=").append(collectProductCount);
-        sb.append(", collectSubjectCount=").append(collectSubjectCount);
-        sb.append(", collectTopicCount=").append(collectTopicCount);
-        sb.append(", collectCommentCount=").append(collectCommentCount);
-        sb.append(", inviteFriendCount=").append(inviteFriendCount);
-        sb.append(", recentOrderTime=").append(recentOrderTime);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 最后一次下订单时间
+     */
+    @TableField("recent_order_time")
+    private LocalDateTime recentOrderTime;
 }

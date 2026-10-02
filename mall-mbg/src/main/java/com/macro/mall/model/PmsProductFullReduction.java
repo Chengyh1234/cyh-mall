@@ -1,64 +1,41 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+/**
+ * <p>
+ * 产品满减表(只针对同商品)
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("pms_product_full_reduction")
 public class PmsProductFullReduction implements Serializable {
-    private Long id;
-
-    private Long productId;
-
-    private BigDecimal fullPrice;
-
-    private BigDecimal reducePrice;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("product_id")
+    private Long productId;
 
-    public Long getProductId() {
-        return productId;
-    }
+    @TableField("full_price")
+    private BigDecimal fullPrice;
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public BigDecimal getFullPrice() {
-        return fullPrice;
-    }
-
-    public void setFullPrice(BigDecimal fullPrice) {
-        this.fullPrice = fullPrice;
-    }
-
-    public BigDecimal getReducePrice() {
-        return reducePrice;
-    }
-
-    public void setReducePrice(BigDecimal reducePrice) {
-        this.reducePrice = reducePrice;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", productId=").append(productId);
-        sb.append(", fullPrice=").append(fullPrice);
-        sb.append(", reducePrice=").append(reducePrice);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    @TableField("reduce_price")
+    private BigDecimal reducePrice;
 }

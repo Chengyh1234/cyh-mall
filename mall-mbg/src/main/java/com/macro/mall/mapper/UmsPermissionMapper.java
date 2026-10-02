@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.UmsPermission;
-import com.macro.mall.model.UmsPermissionExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface UmsPermissionMapper {
-    long countByExample(UmsPermissionExample example);
+/**
+ * <p>
+ * 后台用户权限表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface UmsPermissionMapper extends BaseMapper<UmsPermission> {
 
-    int deleteByExample(UmsPermissionExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(UmsPermission row);
-
-    int insertSelective(UmsPermission row);
-
-    List<UmsPermission> selectByExample(UmsPermissionExample example);
-
-    UmsPermission selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") UmsPermission row, @Param("example") UmsPermissionExample example);
-
-    int updateByExample(@Param("row") UmsPermission row, @Param("example") UmsPermissionExample example);
-
-    int updateByPrimaryKeySelective(UmsPermission row);
-
-    int updateByPrimaryKey(UmsPermission row);
 }

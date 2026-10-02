@@ -1,246 +1,132 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 会员表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("ums_member")
 public class UmsMember implements Serializable {
-    private Long id;
-
-    private Long memberLevelId;
-
-    @Schema(title = "用户名")
-    private String username;
-
-    @Schema(title = "密码")
-    private String password;
-
-    @Schema(title = "昵称")
-    private String nickname;
-
-    @Schema(title = "手机号码")
-    private String phone;
-
-    @Schema(title = "帐号启用状态:0->禁用；1->启用")
-    private Integer status;
-
-    @Schema(title = "注册时间")
-    private Date createTime;
-
-    @Schema(title = "头像")
-    private String icon;
-
-    @Schema(title = "性别：0->未知；1->男；2->女")
-    private Integer gender;
-
-    @Schema(title = "生日")
-    private Date birthday;
-
-    @Schema(title = "所做城市")
-    private String city;
-
-    @Schema(title = "职业")
-    private String job;
-
-    @Schema(title = "个性签名")
-    private String personalizedSignature;
-
-    @Schema(title = "用户来源")
-    private Integer sourceType;
-
-    @Schema(title = "积分")
-    private Integer integration;
-
-    @Schema(title = "成长值")
-    private Integer growth;
-
-    @Schema(title = "剩余抽奖次数")
-    private Integer luckeyCount;
-
-    @Schema(title = "历史积分数量")
-    private Integer historyIntegration;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("member_level_id")
+    private Long memberLevelId;
 
-    public Long getMemberLevelId() {
-        return memberLevelId;
-    }
+    /**
+     * 手机号码
+     */
+    @TableField("phone")
+    private String phone;
 
-    public void setMemberLevelId(Long memberLevelId) {
-        this.memberLevelId = memberLevelId;
-    }
+    /**
+     * 密码
+     */
+    @TableField("password")
+    private String password;
 
-    public String getUsername() {
-        return username;
-    }
+    /**
+     * 昵称
+     */
+    @TableField("nickname")
+    private String nickname;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    /**
+     * 帐号启用状态:0->禁用；1->启用
+     */
+    @TableField("status")
+    private Integer status;
 
-    public String getPassword() {
-        return password;
-    }
+    /**
+     * 注册时间
+     */
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    /**
+     * 头像
+     */
+    @TableField("icon")
+    private String icon;
 
-    public String getNickname() {
-        return nickname;
-    }
+    /**
+     * 性别：0->未知；1->男；2->女
+     */
+    @TableField("gender")
+    private Integer gender;
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
+    /**
+     * 生日
+     */
+    @TableField("birthday")
+    private LocalDate birthday;
 
-    public String getPhone() {
-        return phone;
-    }
+    /**
+     * 所做城市
+     */
+    @TableField("city")
+    private String city;
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    /**
+     * 职业
+     */
+    @TableField("job")
+    private String job;
 
-    public Integer getStatus() {
-        return status;
-    }
+    /**
+     * 个性签名
+     */
+    @TableField("personalized_signature")
+    private String personalizedSignature;
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
+    /**
+     * 用户来源
+     */
+    @TableField("source_type")
+    private Integer sourceType;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 积分
+     */
+    @TableField("integration")
+    private Integer integration;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 成长值
+     */
+    @TableField("growth")
+    private Integer growth;
 
-    public String getIcon() {
-        return icon;
-    }
+    /**
+     * 剩余抽奖次数
+     */
+    @TableField("luckey_count")
+    private Integer luckeyCount;
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public Integer getGender() {
-        return gender;
-    }
-
-    public void setGender(Integer gender) {
-        this.gender = gender;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getJob() {
-        return job;
-    }
-
-    public void setJob(String job) {
-        this.job = job;
-    }
-
-    public String getPersonalizedSignature() {
-        return personalizedSignature;
-    }
-
-    public void setPersonalizedSignature(String personalizedSignature) {
-        this.personalizedSignature = personalizedSignature;
-    }
-
-    public Integer getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(Integer sourceType) {
-        this.sourceType = sourceType;
-    }
-
-    public Integer getIntegration() {
-        return integration;
-    }
-
-    public void setIntegration(Integer integration) {
-        this.integration = integration;
-    }
-
-    public Integer getGrowth() {
-        return growth;
-    }
-
-    public void setGrowth(Integer growth) {
-        this.growth = growth;
-    }
-
-    public Integer getLuckeyCount() {
-        return luckeyCount;
-    }
-
-    public void setLuckeyCount(Integer luckeyCount) {
-        this.luckeyCount = luckeyCount;
-    }
-
-    public Integer getHistoryIntegration() {
-        return historyIntegration;
-    }
-
-    public void setHistoryIntegration(Integer historyIntegration) {
-        this.historyIntegration = historyIntegration;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", memberLevelId=").append(memberLevelId);
-        sb.append(", username=").append(username);
-        sb.append(", password=").append(password);
-        sb.append(", nickname=").append(nickname);
-        sb.append(", phone=").append(phone);
-        sb.append(", status=").append(status);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", icon=").append(icon);
-        sb.append(", gender=").append(gender);
-        sb.append(", birthday=").append(birthday);
-        sb.append(", city=").append(city);
-        sb.append(", job=").append(job);
-        sb.append(", personalizedSignature=").append(personalizedSignature);
-        sb.append(", sourceType=").append(sourceType);
-        sb.append(", integration=").append(integration);
-        sb.append(", growth=").append(growth);
-        sb.append(", luckeyCount=").append(luckeyCount);
-        sb.append(", historyIntegration=").append(historyIntegration);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 历史积分数量
+     */
+    @TableField("history_integration")
+    private Integer historyIntegration;
 }

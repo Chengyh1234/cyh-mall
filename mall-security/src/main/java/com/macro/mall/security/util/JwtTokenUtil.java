@@ -44,7 +44,7 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 根据负责生成JWT的token
+     * 根据负载生成JWT的token
      */
     private String generateToken(Map<String, Object> claims) {
         // 设置过期时间

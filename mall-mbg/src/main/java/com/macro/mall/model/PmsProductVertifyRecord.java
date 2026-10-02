@@ -1,88 +1,53 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 商品审核记录
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("pms_product_vertify_record")
 public class PmsProductVertifyRecord implements Serializable {
-    private Long id;
-
-    private Long productId;
-
-    private Date createTime;
-
-    @Schema(title = "审核人")
-    private String vertifyMan;
-
-    private Integer status;
-
-    @Schema(title = "反馈详情")
-    private String detail;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("product_id")
+    private Long productId;
 
-    public Long getProductId() {
-        return productId;
-    }
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
+    /**
+     * 审核人
+     */
+    @TableField("vertify_man")
+    private String vertifyMan;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    @TableField("status")
+    private Integer status;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getVertifyMan() {
-        return vertifyMan;
-    }
-
-    public void setVertifyMan(String vertifyMan) {
-        this.vertifyMan = vertifyMan;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getDetail() {
-        return detail;
-    }
-
-    public void setDetail(String detail) {
-        this.detail = detail;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", productId=").append(productId);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", vertifyMan=").append(vertifyMan);
-        sb.append(", status=").append(status);
-        sb.append(", detail=").append(detail);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 反馈详情
+     */
+    @TableField("detail")
+    private String detail;
 }

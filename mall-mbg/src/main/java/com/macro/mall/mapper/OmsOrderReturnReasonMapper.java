@@ -1,30 +1,16 @@
 package com.macro.mall.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.macro.mall.model.OmsOrderReturnReason;
-import com.macro.mall.model.OmsOrderReturnReasonExample;
-import java.util.List;
-import org.apache.ibatis.annotations.Param;
 
-public interface OmsOrderReturnReasonMapper {
-    long countByExample(OmsOrderReturnReasonExample example);
+/**
+ * <p>
+ * 退货原因表 Mapper 接口
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+public interface OmsOrderReturnReasonMapper extends BaseMapper<OmsOrderReturnReason> {
 
-    int deleteByExample(OmsOrderReturnReasonExample example);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(OmsOrderReturnReason row);
-
-    int insertSelective(OmsOrderReturnReason row);
-
-    List<OmsOrderReturnReason> selectByExample(OmsOrderReturnReasonExample example);
-
-    OmsOrderReturnReason selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("row") OmsOrderReturnReason row, @Param("example") OmsOrderReturnReasonExample example);
-
-    int updateByExample(@Param("row") OmsOrderReturnReason row, @Param("example") OmsOrderReturnReasonExample example);
-
-    int updateByPrimaryKeySelective(OmsOrderReturnReason row);
-
-    int updateByPrimaryKey(OmsOrderReturnReason row);
 }

@@ -1,157 +1,80 @@
 package com.macro.mall.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
+/**
+ * <p>
+ * 话题表
+ * </p>
+ *
+ * @author cyh
+ * @since 2026-10-02
+ */
+@Getter
+@Setter
+@ToString
+@TableName("cms_topic")
 public class CmsTopic implements Serializable {
-    private Long id;
-
-    private Long categoryId;
-
-    private String name;
-
-    private Date createTime;
-
-    private Date startTime;
-
-    private Date endTime;
-
-    @Schema(title = "参与人数")
-    private Integer attendCount;
-
-    @Schema(title = "关注人数")
-    private Integer attentionCount;
-
-    private Integer readCount;
-
-    @Schema(title = "奖品名称")
-    private String awardName;
-
-    @Schema(title = "参与方式")
-    private String attendType;
-
-    @Schema(title = "话题内容")
-    private String content;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @TableField("category_id")
+    private Long categoryId;
 
-    public Long getCategoryId() {
-        return categoryId;
-    }
+    @TableField("name")
+    private String name;
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
+    @TableField("create_time")
+    private LocalDateTime createTime;
 
-    public String getName() {
-        return name;
-    }
+    @TableField("start_time")
+    private LocalDateTime startTime;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    @TableField("end_time")
+    private LocalDateTime endTime;
 
-    public Date getCreateTime() {
-        return createTime;
-    }
+    /**
+     * 参与人数
+     */
+    @TableField("attend_count")
+    private Integer attendCount;
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+    /**
+     * 关注人数
+     */
+    @TableField("attention_count")
+    private Integer attentionCount;
 
-    public Date getStartTime() {
-        return startTime;
-    }
+    @TableField("read_count")
+    private Integer readCount;
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
+    /**
+     * 奖品名称
+     */
+    @TableField("award_name")
+    private String awardName;
 
-    public Date getEndTime() {
-        return endTime;
-    }
+    /**
+     * 参与方式
+     */
+    @TableField("attend_type")
+    private String attendType;
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getAttendCount() {
-        return attendCount;
-    }
-
-    public void setAttendCount(Integer attendCount) {
-        this.attendCount = attendCount;
-    }
-
-    public Integer getAttentionCount() {
-        return attentionCount;
-    }
-
-    public void setAttentionCount(Integer attentionCount) {
-        this.attentionCount = attentionCount;
-    }
-
-    public Integer getReadCount() {
-        return readCount;
-    }
-
-    public void setReadCount(Integer readCount) {
-        this.readCount = readCount;
-    }
-
-    public String getAwardName() {
-        return awardName;
-    }
-
-    public void setAwardName(String awardName) {
-        this.awardName = awardName;
-    }
-
-    public String getAttendType() {
-        return attendType;
-    }
-
-    public void setAttendType(String attendType) {
-        this.attendType = attendType;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", categoryId=").append(categoryId);
-        sb.append(", name=").append(name);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", startTime=").append(startTime);
-        sb.append(", endTime=").append(endTime);
-        sb.append(", attendCount=").append(attendCount);
-        sb.append(", attentionCount=").append(attentionCount);
-        sb.append(", readCount=").append(readCount);
-        sb.append(", awardName=").append(awardName);
-        sb.append(", attendType=").append(attendType);
-        sb.append(", content=").append(content);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
+    /**
+     * 话题内容
+     */
+    @TableField("content")
+    private String content;
 }
