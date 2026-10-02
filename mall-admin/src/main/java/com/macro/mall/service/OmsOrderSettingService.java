@@ -1,12 +1,14 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.model.OmsOrderSetting;
 
 /**
  * 订单设置管理Service
  * Created by macro on 2018/10/16.
  */
-public interface OmsOrderSettingService {
+public interface OmsOrderSettingService extends IService<OmsOrderSetting> {
     /**
      * 获取指定订单设置
      */

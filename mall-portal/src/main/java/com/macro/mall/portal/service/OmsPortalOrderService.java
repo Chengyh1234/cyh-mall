@@ -1,5 +1,7 @@
 package com.macro.mall.portal.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.portal.domain.ConfirmOrderResult;
@@ -14,7 +16,7 @@ import java.util.Map;
  * 前台订单管理Service
  * Created by macro on 2018/8/30.
  */
-public interface OmsPortalOrderService {
+public interface OmsPortalOrderService extends IService<OmsOrder> {
     /**
      * 根据用户购物车信息生成确认单信息
      */

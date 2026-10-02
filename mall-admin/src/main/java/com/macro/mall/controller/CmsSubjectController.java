@@ -1,5 +1,6 @@
 package com.macro.mall.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.CmsSubject;
@@ -40,7 +41,7 @@ public class CmsSubjectController {
     public CommonResult<CommonPage<CmsSubject>> getList(@RequestParam(value = "keyword", required = false) String keyword,
                                                         @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                         @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
-        List<CmsSubject> subjectList = subjectService.list(keyword, pageNum, pageSize);
+        IPage<CmsSubject> subjectList = subjectService.list(keyword, pageNum, pageSize);
         return CommonResult.success(CommonPage.restPage(subjectList));
     }
 }

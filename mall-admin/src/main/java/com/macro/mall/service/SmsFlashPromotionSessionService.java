@@ -1,5 +1,7 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.dto.SmsFlashPromotionSessionDetail;
 import com.macro.mall.model.SmsFlashPromotionSession;
 
@@ -9,7 +11,7 @@ import java.util.List;
  * 限时购场次管理Service
  * Created by macro on 2018/11/16.
  */
-public interface SmsFlashPromotionSessionService {
+public interface SmsFlashPromotionSessionService extends IService<SmsFlashPromotionSession> {
     /**
      * 添加场次
      */
@@ -34,11 +36,6 @@ public interface SmsFlashPromotionSessionService {
      * 获取详情
      */
     SmsFlashPromotionSession getItem(Long id);
-
-    /**
-     * 根据启用状态获取场次列表
-     */
-    List<SmsFlashPromotionSession> list();
 
     /**
      * 获取全部可选场次及其数量

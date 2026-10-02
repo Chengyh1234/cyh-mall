@@ -1,12 +1,14 @@
 package com.macro.mall.portal.service.impl;
 
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.mapper.PmsBrandMapper;
 import com.macro.mall.mapper.PmsProductMapper;
 import com.macro.mall.model.PmsBrand;
 import com.macro.mall.model.PmsProduct;
-import com.macro.mall.model.PmsProductExample;
 import com.macro.mall.portal.dao.HomeDao;
 import com.macro.mall.portal.service.PmsPortalBrandService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +21,9 @@ import java.util.List;
  * Created by macro on 2020/5/15.
  */
 @Service
-public class PmsPortalBrandServiceImpl implements PmsPortalBrandService {
+public class PmsPortalBrandServiceImpl extends ServiceImpl<PmsBrandMapper, PmsBrand> implements PmsPortalBrandService {
     @Autowired
     private HomeDao homeDao;
-    @Autowired
-    private PmsBrandMapper brandMapper;
     @Autowired
     private PmsProductMapper productMapper;
 
@@ -35,17 +35,16 @@ public class PmsPortalBrandServiceImpl implements PmsPortalBrandService {
 
     @Override
     public PmsBrand detail(Long brandId) {
-        return brandMapper.selectByPrimaryKey(brandId);
+        return baseMapper.selectById(brandId);
     }
 
     @Override
     public CommonPage<PmsProduct> productList(Long brandId, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andDeleteStatusEqualTo(0)
-                .andPublishStatusEqualTo(1)
-                .andBrandIdEqualTo(brandId);
-        List<PmsProduct> productList = productMapper.selectByExample(example);
-        return CommonPage.restPage(productList);
+        IPage<PmsProduct> page = productMapper.selectPage(new Page<>(pageNum, pageSize),
+                new LambdaQueryWrapper<PmsProduct>()
+                        .eq(PmsProduct::getDeleteStatus, 0)
+                        .eq(PmsProduct::getPublishStatus, 1)
+                        .eq(PmsProduct::getBrandId, brandId));
+        return CommonPage.restPage(page);
     }
 }

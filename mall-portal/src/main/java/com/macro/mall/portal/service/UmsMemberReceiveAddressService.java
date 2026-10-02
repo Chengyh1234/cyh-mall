@@ -1,5 +1,7 @@
 package com.macro.mall.portal.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.model.UmsMemberReceiveAddress;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,7 +11,7 @@ import java.util.List;
  * 用户地址管理Service
  * Created by macro on 2018/8/28.
  */
-public interface UmsMemberReceiveAddressService {
+public interface UmsMemberReceiveAddressService extends IService<UmsMemberReceiveAddress> {
     /**
      * 添加收货地址
      */
@@ -28,11 +30,6 @@ public interface UmsMemberReceiveAddressService {
      */
     @Transactional
     int update(Long id, UmsMemberReceiveAddress address);
-
-    /**
-     * 返回当前用户的收货地址
-     */
-    List<UmsMemberReceiveAddress> list();
 
     /**
      * 获取地址详情

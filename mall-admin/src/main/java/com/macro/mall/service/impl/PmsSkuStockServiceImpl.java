@@ -1,10 +1,11 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dao.PmsSkuStockDao;
 import com.macro.mall.mapper.PmsSkuStockMapper;
 import com.macro.mall.model.PmsSkuStock;
-import com.macro.mall.model.PmsSkuStockExample;
 import com.macro.mall.service.PmsSkuStockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,20 +18,18 @@ import java.util.stream.Collectors;
  * Created by macro on 2018/4/27.
  */
 @Service
-public class PmsSkuStockServiceImpl implements PmsSkuStockService {
-    @Autowired
-    private PmsSkuStockMapper skuStockMapper;
+public class PmsSkuStockServiceImpl extends ServiceImpl<PmsSkuStockMapper, PmsSkuStock> implements PmsSkuStockService {
     @Autowired
     private PmsSkuStockDao skuStockDao;
 
     @Override
     public List<PmsSkuStock> getList(Long pid, String keyword) {
-        PmsSkuStockExample example = new PmsSkuStockExample();
-        PmsSkuStockExample.Criteria criteria = example.createCriteria().andProductIdEqualTo(pid);
+        LambdaQueryWrapper<PmsSkuStock> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmsSkuStock::getProductId, pid);
         if (!StrUtil.isEmpty(keyword)) {
-            criteria.andSkuCodeLike("%" + keyword + "%");
+            wrapper.like(PmsSkuStock::getSkuCode, keyword);
         }
-        return skuStockMapper.selectByExample(example);
+        return this.list(wrapper);
     }
 
     @Override

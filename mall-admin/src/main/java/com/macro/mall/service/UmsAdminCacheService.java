@@ -1,6 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
 import com.macro.mall.model.UmsAdmin;
+import com.macro.mall.model.UmsAdminRoleRelation;
 import com.macro.mall.model.UmsResource;
 
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
  * 后台用户缓存管理Service
  * Created by macro on 2020/3/13.
  */
-public interface UmsAdminCacheService {
+public interface UmsAdminCacheService extends IService<UmsAdminRoleRelation> {
     /**
      * 删除后台用户缓存
      */

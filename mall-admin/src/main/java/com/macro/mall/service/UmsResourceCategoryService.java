@@ -1,5 +1,7 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.model.UmsResourceCategory;
 
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
  * 后台资源分类管理Service
  * Created by macro on 2020/2/5.
  */
-public interface UmsResourceCategoryService {
+public interface UmsResourceCategoryService extends IService<UmsResourceCategory> {
 
     /**
      * 获取所有资源分类

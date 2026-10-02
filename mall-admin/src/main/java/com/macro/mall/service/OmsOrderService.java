@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.dto.*;
 import com.macro.mall.model.OmsOrder;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,11 +13,11 @@ import java.util.List;
  * 订单管理Service
  * Created by macro on 2018/10/11.
  */
-public interface OmsOrderService {
+public interface OmsOrderService extends IService<OmsOrder> {
     /**
      * 分页查询订单
      */
-    List<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum);
+    IPage<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum);
 
     /**
      * 批量发货

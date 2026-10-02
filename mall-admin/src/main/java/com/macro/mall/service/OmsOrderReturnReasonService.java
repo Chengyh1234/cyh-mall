@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.OmsOrderReturnReason;
 
 import java.util.List;
@@ -8,7 +11,7 @@ import java.util.List;
  * 退货原因管理Service
  * Created by macro on 2018/10/17.
  */
-public interface OmsOrderReturnReasonService {
+public interface OmsOrderReturnReasonService extends IService<OmsOrderReturnReason> {
     /**
      * 添加退货原因
      */
@@ -27,7 +30,7 @@ public interface OmsOrderReturnReasonService {
     /**
      * 分页获取退货原因
      */
-    List<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum);
+    IPage<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum);
 
     /**
      * 批量修改退货原因状态

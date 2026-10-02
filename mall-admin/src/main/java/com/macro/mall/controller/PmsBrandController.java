@@ -5,6 +5,7 @@ import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.PmsBrandParam;
 import com.macro.mall.model.PmsBrand;
 import com.macro.mall.service.PmsBrandService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +81,7 @@ public class PmsBrandController {
                                                       @RequestParam(value = "showStatus",required = false) Integer showStatus,
                                                       @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                                       @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize) {
-        List<PmsBrand> brandList = brandService.listBrand(keyword,showStatus,pageNum, pageSize);
+        IPage<PmsBrand> brandList = brandService.listBrand(keyword,showStatus,pageNum, pageSize);
         return CommonResult.success(CommonPage.restPage(brandList));
     }
 

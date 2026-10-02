@@ -36,20 +36,19 @@ public class UmsMemberController {
     @Operation(summary = "会员注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult register(@RequestParam String username,
+    public CommonResult register(@RequestParam String phone,
                                  @RequestParam String password,
-                                 @RequestParam String telephone,
                                  @RequestParam String authCode) {
-        memberService.register(username, password, telephone, authCode);
+        memberService.register(phone, password, authCode);
         return CommonResult.success(null,"注册成功");
     }
 
     @Operation(summary = "会员登录")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult login(@RequestParam String username,
+    public CommonResult login(@RequestParam String phone,
                               @RequestParam String password) {
-        String token = memberService.login(username, password);
+        String token = memberService.login(phone, password);
         if (token == null) {
             return CommonResult.validateFailed("用户名或密码错误");
         }

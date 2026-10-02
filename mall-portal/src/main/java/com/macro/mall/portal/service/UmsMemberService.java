@@ -1,5 +1,7 @@
 package com.macro.mall.portal.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.model.UmsMember;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
  * 会员管理Service
  * Created by macro on 2018/8/3.
  */
-public interface UmsMemberService {
+public interface UmsMemberService extends IService<UmsMember> {
     /**
-     * 根据用户名获取会员
+     * 根据手机号获取会员
      */
-    UmsMember getByUsername(String username);
+    UmsMember getByPhone(String phone);
 
     /**
      * 根据会员编号获取会员
@@ -23,7 +25,7 @@ public interface UmsMemberService {
      * 用户注册
      */
     @Transactional
-    void register(String username, String password, String telephone, String authCode);
+    void register(String phone, String password, String authCode);
 
     /**
      * 生成验证码
@@ -55,7 +57,7 @@ public interface UmsMemberService {
     /**
      * 登录后获取token
      */
-    String login(String username, String password);
+    String login(String phone, String password);
 
     /**
      * 刷新token

@@ -1,12 +1,13 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.mapper.CmsSubjectMapper;
 import com.macro.mall.model.CmsSubject;
-import com.macro.mall.model.CmsSubjectExample;
 import com.macro.mall.service.CmsSubjectService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,23 +17,19 @@ import java.util.List;
  * Created by macro on 2018/6/1.
  */
 @Service
-public class CmsSubjectServiceImpl implements CmsSubjectService {
-    @Autowired
-    private CmsSubjectMapper subjectMapper;
+public class CmsSubjectServiceImpl extends ServiceImpl<CmsSubjectMapper, CmsSubject> implements CmsSubjectService {
 
     @Override
     public List<CmsSubject> listAll() {
-        return subjectMapper.selectByExample(new CmsSubjectExample());
+        return this.list();
     }
 
     @Override
-    public List<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        CmsSubjectExample example = new CmsSubjectExample();
-        CmsSubjectExample.Criteria criteria = example.createCriteria();
+    public IPage<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize) {
+        LambdaQueryWrapper<CmsSubject> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
-            criteria.andTitleLike("%" + keyword + "%");
+            wrapper.like(CmsSubject::getTitle, keyword);
         }
-        return subjectMapper.selectByExample(example);
+        return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 }

@@ -1,5 +1,7 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.model.CmsPrefrenceArea;
 
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
  * 优选专区管理Service
  * Created by macro on 2018/6/1.
  */
-public interface CmsPrefrenceAreaService {
+public interface CmsPrefrenceAreaService extends IService<CmsPrefrenceArea> {
     /**
      * 获取所有优选专区
      */

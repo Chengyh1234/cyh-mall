@@ -1,12 +1,13 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.mapper.SmsCouponHistoryMapper;
 import com.macro.mall.model.SmsCouponHistory;
-import com.macro.mall.model.SmsCouponHistoryExample;
 import com.macro.mall.service.SmsCouponHistoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,23 +17,19 @@ import java.util.List;
  * Created by macro on 2018/11/6.
  */
 @Service
-public class SmsCouponHistoryServiceImpl implements SmsCouponHistoryService {
-    @Autowired
-    private SmsCouponHistoryMapper historyMapper;
+public class SmsCouponHistoryServiceImpl extends ServiceImpl<SmsCouponHistoryMapper, SmsCouponHistory> implements SmsCouponHistoryService {
     @Override
-    public List<SmsCouponHistory> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        SmsCouponHistoryExample example = new SmsCouponHistoryExample();
-        SmsCouponHistoryExample.Criteria criteria = example.createCriteria();
+    public IPage<SmsCouponHistory> list(Long couponId, Integer useStatus, String orderSn, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<SmsCouponHistory> wrapper = new LambdaQueryWrapper<>();
         if(couponId!=null){
-            criteria.andCouponIdEqualTo(couponId);
+            wrapper.eq(SmsCouponHistory::getCouponId, couponId);
         }
         if(useStatus!=null){
-            criteria.andUseStatusEqualTo(useStatus);
+            wrapper.eq(SmsCouponHistory::getUseStatus, useStatus);
         }
         if(!StrUtil.isEmpty(orderSn)){
-            criteria.andOrderSnEqualTo(orderSn);
+            wrapper.eq(SmsCouponHistory::getOrderSn, orderSn);
         }
-        return historyMapper.selectByExample(example);
+        return this.page(new Page<>(pageNum,pageSize), wrapper);
     }
 }

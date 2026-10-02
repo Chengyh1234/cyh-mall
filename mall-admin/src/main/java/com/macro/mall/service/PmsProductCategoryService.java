@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.dto.PmsProductCategoryParam;
 import com.macro.mall.dto.PmsProductCategoryWithChildrenItem;
 import com.macro.mall.model.PmsProductCategory;
@@ -11,7 +14,7 @@ import java.util.List;
  * 商品分类管理Service
  * Created by macro on 2018/4/26.
  */
-public interface PmsProductCategoryService {
+public interface PmsProductCategoryService extends IService<PmsProductCategory> {
     /**
      * 创建商品分类
      */
@@ -27,7 +30,7 @@ public interface PmsProductCategoryService {
     /**
      * 分页获取商品分类
      */
-    List<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum);
+    IPage<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum);
 
     /**
      * 删除商品分类

@@ -1,17 +1,18 @@
 package com.macro.mall.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dto.SmsFlashPromotionSessionDetail;
 import com.macro.mall.mapper.SmsFlashPromotionSessionMapper;
 import com.macro.mall.model.SmsFlashPromotionSession;
-import com.macro.mall.model.SmsFlashPromotionSessionExample;
 import com.macro.mall.service.SmsFlashPromotionProductRelationService;
 import com.macro.mall.service.SmsFlashPromotionSessionService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,22 +20,20 @@ import java.util.List;
  * Created by macro on 2018/11/16.
  */
 @Service
-public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSessionService {
-    @Autowired
-    private SmsFlashPromotionSessionMapper promotionSessionMapper;
+public class SmsFlashPromotionSessionServiceImpl extends ServiceImpl<SmsFlashPromotionSessionMapper, SmsFlashPromotionSession> implements SmsFlashPromotionSessionService {
     @Autowired
     private SmsFlashPromotionProductRelationService relationService;
 
     @Override
     public int create(SmsFlashPromotionSession promotionSession) {
-        promotionSession.setCreateTime(new Date());
-        return promotionSessionMapper.insert(promotionSession);
+        promotionSession.setCreateTime(LocalDateTime.now());
+        return baseMapper.insert(promotionSession);
     }
 
     @Override
     public int update(Long id, SmsFlashPromotionSession promotionSession) {
         promotionSession.setId(id);
-        return promotionSessionMapper.updateByPrimaryKey(promotionSession);
+        return baseMapper.updateById(promotionSession);
     }
 
     @Override
@@ -42,31 +41,30 @@ public class SmsFlashPromotionSessionServiceImpl implements SmsFlashPromotionSes
         SmsFlashPromotionSession promotionSession = new SmsFlashPromotionSession();
         promotionSession.setId(id);
         promotionSession.setStatus(status);
-        return promotionSessionMapper.updateByPrimaryKeySelective(promotionSession);
+        return baseMapper.updateById(promotionSession);
     }
 
     @Override
     public int delete(Long id) {
-        return promotionSessionMapper.deleteByPrimaryKey(id);
+        return baseMapper.deleteById(id);
     }
 
     @Override
     public SmsFlashPromotionSession getItem(Long id) {
-        return promotionSessionMapper.selectByPrimaryKey(id);
+        return this.getById(id);
     }
 
     @Override
     public List<SmsFlashPromotionSession> list() {
-        SmsFlashPromotionSessionExample example = new SmsFlashPromotionSessionExample();
-        return promotionSessionMapper.selectByExample(example);
+        return this.list(new LambdaQueryWrapper<>());
     }
 
     @Override
     public List<SmsFlashPromotionSessionDetail> selectList(Long flashPromotionId) {
         List<SmsFlashPromotionSessionDetail> result = new ArrayList<>();
-        SmsFlashPromotionSessionExample example = new SmsFlashPromotionSessionExample();
-        example.createCriteria().andStatusEqualTo(1);
-        List<SmsFlashPromotionSession> list = promotionSessionMapper.selectByExample(example);
+        LambdaQueryWrapper<SmsFlashPromotionSession> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SmsFlashPromotionSession::getStatus, 1);
+        List<SmsFlashPromotionSession> list = this.list(wrapper);
         for (SmsFlashPromotionSession promotionSession : list) {
             SmsFlashPromotionSessionDetail detail = new SmsFlashPromotionSessionDetail();
             BeanUtils.copyProperties(promotionSession, detail);

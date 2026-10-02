@@ -1,14 +1,15 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dto.PmsBrandParam;
 import com.macro.mall.mapper.PmsBrandMapper;
 import com.macro.mall.mapper.PmsProductMapper;
 import com.macro.mall.model.PmsBrand;
-import com.macro.mall.model.PmsBrandExample;
 import com.macro.mall.model.PmsProduct;
-import com.macro.mall.model.PmsProductExample;
 import com.macro.mall.service.PmsBrandService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +22,13 @@ import java.util.List;
  * Created by macro on 2018/4/26.
  */
 @Service
-public class PmsBrandServiceImpl implements PmsBrandService {
-    @Autowired
-    private PmsBrandMapper brandMapper;
+public class PmsBrandServiceImpl extends ServiceImpl<PmsBrandMapper, PmsBrand> implements PmsBrandService {
     @Autowired
     private PmsProductMapper productMapper;
 
     @Override
     public List<PmsBrand> listAllBrand() {
-        return brandMapper.selectByExample(new PmsBrandExample());
+        return this.list();
     }
 
     @Override
@@ -40,7 +39,7 @@ public class PmsBrandServiceImpl implements PmsBrandService {
         if (StrUtil.isEmpty(pmsBrand.getFirstLetter())) {
             pmsBrand.setFirstLetter(pmsBrand.getName().substring(0, 1));
         }
-        return brandMapper.insertSelective(pmsBrand);
+        return baseMapper.insert(pmsBrand);
     }
 
     @Override
@@ -55,59 +54,52 @@ public class PmsBrandServiceImpl implements PmsBrandService {
         //更新品牌时要更新商品中的品牌名称
         PmsProduct product = new PmsProduct();
         product.setBrandName(pmsBrand.getName());
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andBrandIdEqualTo(id);
-        productMapper.updateByExampleSelective(product,example);
-        return brandMapper.updateByPrimaryKeySelective(pmsBrand);
+        productMapper.update(product, new LambdaQueryWrapper<PmsProduct>()
+                .eq(PmsProduct::getBrandId, id));
+        return baseMapper.updateById(pmsBrand);
     }
 
     @Override
     public int deleteBrand(Long id) {
-        return brandMapper.deleteByPrimaryKey(id);
+        return baseMapper.deleteById(id);
     }
 
     @Override
     public int deleteBrand(List<Long> ids) {
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.createCriteria().andIdIn(ids);
-        return brandMapper.deleteByExample(pmsBrandExample);
+        return baseMapper.delete(new LambdaQueryWrapper<PmsBrand>().in(PmsBrand::getId, ids));
     }
 
     @Override
-    public List<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.setOrderByClause("sort desc");
-        PmsBrandExample.Criteria criteria = pmsBrandExample.createCriteria();
+    public IPage<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize) {
+        LambdaQueryWrapper<PmsBrand> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
-            criteria.andNameLike("%" + keyword + "%");
+            wrapper.like(PmsBrand::getName, keyword);
         }
-        if(showStatus!=null){
-            criteria.andShowStatusEqualTo(showStatus);
+        if (showStatus != null) {
+            wrapper.eq(PmsBrand::getShowStatus, showStatus);
         }
-        return brandMapper.selectByExample(pmsBrandExample);
+        wrapper.orderByDesc(PmsBrand::getSort);
+        return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 
     @Override
     public PmsBrand getBrand(Long id) {
-        return brandMapper.selectByPrimaryKey(id);
+        return this.getById(id);
     }
 
     @Override
     public int updateShowStatus(List<Long> ids, Integer showStatus) {
         PmsBrand pmsBrand = new PmsBrand();
         pmsBrand.setShowStatus(showStatus);
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.createCriteria().andIdIn(ids);
-        return brandMapper.updateByExampleSelective(pmsBrand, pmsBrandExample);
+        return baseMapper.update(pmsBrand, new LambdaQueryWrapper<PmsBrand>()
+                .in(PmsBrand::getId, ids));
     }
 
     @Override
     public int updateFactoryStatus(List<Long> ids, Integer factoryStatus) {
         PmsBrand pmsBrand = new PmsBrand();
         pmsBrand.setFactoryStatus(factoryStatus);
-        PmsBrandExample pmsBrandExample = new PmsBrandExample();
-        pmsBrandExample.createCriteria().andIdIn(ids);
-        return brandMapper.updateByExampleSelective(pmsBrand, pmsBrandExample);
+        return baseMapper.update(pmsBrand, new LambdaQueryWrapper<PmsBrand>()
+                .in(PmsBrand::getId, ids));
     }
 }

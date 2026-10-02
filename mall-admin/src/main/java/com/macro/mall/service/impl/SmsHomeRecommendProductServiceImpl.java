@@ -1,12 +1,13 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.mapper.SmsHomeRecommendProductMapper;
 import com.macro.mall.model.SmsHomeRecommendProduct;
-import com.macro.mall.model.SmsHomeRecommendProductExample;
 import com.macro.mall.service.SmsHomeRecommendProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +17,13 @@ import java.util.List;
  * Created by macro on 2018/11/7.
  */
 @Service
-public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProductService {
-    @Autowired
-    private SmsHomeRecommendProductMapper recommendProductMapper;
+public class SmsHomeRecommendProductServiceImpl extends ServiceImpl<SmsHomeRecommendProductMapper, SmsHomeRecommendProduct> implements SmsHomeRecommendProductService {
     @Override
     public int create(List<SmsHomeRecommendProduct> homeRecommendProductList) {
         for (SmsHomeRecommendProduct recommendProduct : homeRecommendProductList) {
             recommendProduct.setRecommendStatus(1);
             recommendProduct.setSort(0);
-            recommendProductMapper.insert(recommendProduct);
+            baseMapper.insert(recommendProduct);
         }
         return homeRecommendProductList.size();
     }
@@ -34,37 +33,32 @@ public class SmsHomeRecommendProductServiceImpl implements SmsHomeRecommendProdu
         SmsHomeRecommendProduct recommendProduct = new SmsHomeRecommendProduct();
         recommendProduct.setId(id);
         recommendProduct.setSort(sort);
-        return recommendProductMapper.updateByPrimaryKeySelective(recommendProduct);
+        return baseMapper.updateById(recommendProduct);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        SmsHomeRecommendProductExample example = new SmsHomeRecommendProductExample();
-        example.createCriteria().andIdIn(ids);
-        return recommendProductMapper.deleteByExample(example);
+        return baseMapper.delete(new LambdaQueryWrapper<SmsHomeRecommendProduct>().in(SmsHomeRecommendProduct::getId, ids));
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
-        SmsHomeRecommendProductExample example = new SmsHomeRecommendProductExample();
-        example.createCriteria().andIdIn(ids);
         SmsHomeRecommendProduct record = new SmsHomeRecommendProduct();
         record.setRecommendStatus(recommendStatus);
-        return recommendProductMapper.updateByExampleSelective(record,example);
+        return baseMapper.update(record, new LambdaQueryWrapper<SmsHomeRecommendProduct>()
+                .in(SmsHomeRecommendProduct::getId, ids));
     }
 
     @Override
-    public List<SmsHomeRecommendProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        SmsHomeRecommendProductExample example = new SmsHomeRecommendProductExample();
-        SmsHomeRecommendProductExample.Criteria criteria = example.createCriteria();
+    public IPage<SmsHomeRecommendProduct> list(String productName, Integer recommendStatus, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<SmsHomeRecommendProduct> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(productName)){
-            criteria.andProductNameLike("%"+productName+"%");
+            wrapper.like(SmsHomeRecommendProduct::getProductName, productName);
         }
         if(recommendStatus!=null){
-            criteria.andRecommendStatusEqualTo(recommendStatus);
+            wrapper.eq(SmsHomeRecommendProduct::getRecommendStatus, recommendStatus);
         }
-        example.setOrderByClause("sort desc");
-        return recommendProductMapper.selectByExample(example);
+        wrapper.orderByDesc(SmsHomeRecommendProduct::getSort);
+        return this.page(new Page<>(pageNum,pageSize), wrapper);
     }
 }

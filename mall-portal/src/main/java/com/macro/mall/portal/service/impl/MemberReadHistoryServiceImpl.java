@@ -45,7 +45,7 @@ public class MemberReadHistoryServiceImpl implements MemberReadHistoryService {
         memberReadHistory.setId(null);
         memberReadHistory.setCreateTime(new Date());
         if (sqlEnable) {
-            PmsProduct product = productMapper.selectByPrimaryKey(memberReadHistory.getProductId());
+            PmsProduct product = productMapper.selectById(memberReadHistory.getProductId());
             if (product == null || product.getDeleteStatus() == 1) {
                 return 0;
             }

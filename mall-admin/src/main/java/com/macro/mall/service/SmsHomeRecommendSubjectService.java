@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.SmsHomeRecommendSubject;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,7 +12,7 @@ import java.util.List;
  * 首页专题推荐管理Service
  * Created by macro on 2018/11/7.
  */
-public interface SmsHomeRecommendSubjectService {
+public interface SmsHomeRecommendSubjectService extends IService<SmsHomeRecommendSubject> {
     /**
      * 添加首页推荐
      */
@@ -34,5 +37,5 @@ public interface SmsHomeRecommendSubjectService {
     /**
      * 分页查询推荐
      */
-    List<SmsHomeRecommendSubject> list(String subjectName, Integer recommendStatus, Integer pageSize, Integer pageNum);
+    IPage<SmsHomeRecommendSubject> list(String subjectName, Integer recommendStatus, Integer pageSize, Integer pageNum);
 }

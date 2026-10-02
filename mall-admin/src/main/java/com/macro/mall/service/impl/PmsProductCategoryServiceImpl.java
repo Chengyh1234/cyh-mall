@@ -1,6 +1,9 @@
 package com.macro.mall.service.impl;
 
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dao.PmsProductCategoryAttributeRelationDao;
 import com.macro.mall.dao.PmsProductCategoryDao;
 import com.macro.mall.dto.PmsProductCategoryParam;
@@ -23,9 +26,7 @@ import java.util.List;
  * Created by macro on 2018/4/26.
  */
 @Service
-public class PmsProductCategoryServiceImpl implements PmsProductCategoryService {
-    @Autowired
-    private PmsProductCategoryMapper productCategoryMapper;
+public class PmsProductCategoryServiceImpl extends ServiceImpl<PmsProductCategoryMapper, PmsProductCategory> implements PmsProductCategoryService {
     @Autowired
     private PmsProductMapper productMapper;
     @Autowired
@@ -41,7 +42,7 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         BeanUtils.copyProperties(pmsProductCategoryParam, productCategory);
         //没有父分类时为一级分类
         setCategoryLevel(productCategory);
-        int count = productCategoryMapper.insertSelective(productCategory);
+        int count = baseMapper.insert(productCategory);
         //创建筛选属性关联
         List<Long> productAttributeIdList = pmsProductCategoryParam.getProductAttributeIdList();
         if(!CollUtil.isEmpty(productAttributeIdList)){
@@ -75,58 +76,52 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
         //更新商品分类时要更新商品中的名称
         PmsProduct product = new PmsProduct();
         product.setProductCategoryName(productCategory.getName());
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andProductCategoryIdEqualTo(id);
-        productMapper.updateByExampleSelective(product,example);
+        productMapper.update(product, new LambdaQueryWrapper<PmsProduct>()
+                .eq(PmsProduct::getProductCategoryId, id));
         //同时更新筛选属性的信息
         if(!CollUtil.isEmpty(pmsProductCategoryParam.getProductAttributeIdList())){
-            PmsProductCategoryAttributeRelationExample relationExample = new PmsProductCategoryAttributeRelationExample();
-            relationExample.createCriteria().andProductCategoryIdEqualTo(id);
-            productCategoryAttributeRelationMapper.deleteByExample(relationExample);
+            productCategoryAttributeRelationMapper.delete(new LambdaQueryWrapper<PmsProductCategoryAttributeRelation>()
+                    .eq(PmsProductCategoryAttributeRelation::getProductCategoryId, id));
             insertRelationList(id,pmsProductCategoryParam.getProductAttributeIdList());
         }else{
-            PmsProductCategoryAttributeRelationExample relationExample = new PmsProductCategoryAttributeRelationExample();
-            relationExample.createCriteria().andProductCategoryIdEqualTo(id);
-            productCategoryAttributeRelationMapper.deleteByExample(relationExample);
+            productCategoryAttributeRelationMapper.delete(new LambdaQueryWrapper<PmsProductCategoryAttributeRelation>()
+                    .eq(PmsProductCategoryAttributeRelation::getProductCategoryId, id));
         }
-        return productCategoryMapper.updateByPrimaryKeySelective(productCategory);
+        return baseMapper.updateById(productCategory);
     }
 
     @Override
-    public List<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.setOrderByClause("sort desc");
-        example.createCriteria().andParentIdEqualTo(parentId);
-        return productCategoryMapper.selectByExample(example);
+    public IPage<PmsProductCategory> getList(Long parentId, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<PmsProductCategory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmsProductCategory::getParentId, parentId);
+        wrapper.orderByDesc(PmsProductCategory::getSort);
+        return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 
     @Override
     public int delete(Long id) {
-        return productCategoryMapper.deleteByPrimaryKey(id);
+        return baseMapper.deleteById(id);
     }
 
     @Override
     public PmsProductCategory getItem(Long id) {
-        return productCategoryMapper.selectByPrimaryKey(id);
+        return this.getById(id);
     }
 
     @Override
     public int updateNavStatus(List<Long> ids, Integer navStatus) {
         PmsProductCategory productCategory = new PmsProductCategory();
         productCategory.setNavStatus(navStatus);
-        PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.createCriteria().andIdIn(ids);
-        return productCategoryMapper.updateByExampleSelective(productCategory, example);
+        return baseMapper.update(productCategory, new LambdaQueryWrapper<PmsProductCategory>()
+                .in(PmsProductCategory::getId, ids));
     }
 
     @Override
     public int updateShowStatus(List<Long> ids, Integer showStatus) {
         PmsProductCategory productCategory = new PmsProductCategory();
         productCategory.setShowStatus(showStatus);
-        PmsProductCategoryExample example = new PmsProductCategoryExample();
-        example.createCriteria().andIdIn(ids);
-        return productCategoryMapper.updateByExampleSelective(productCategory, example);
+        return baseMapper.update(productCategory, new LambdaQueryWrapper<PmsProductCategory>()
+                .in(PmsProductCategory::getId, ids));
     }
 
     @Override
@@ -143,7 +138,7 @@ public class PmsProductCategoryServiceImpl implements PmsProductCategoryService 
             productCategory.setLevel(0);
         } else {
             //有父分类时选择根据父分类level设置
-            PmsProductCategory parentCategory = productCategoryMapper.selectByPrimaryKey(productCategory.getParentId());
+            PmsProductCategory parentCategory = this.getById(productCategory.getParentId());
             if (parentCategory != null) {
                 productCategory.setLevel(parentCategory.getLevel() + 1);
             } else {

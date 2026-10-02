@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.dto.OmsOrderReturnApplyResult;
 import com.macro.mall.dto.OmsReturnApplyQueryParam;
 import com.macro.mall.dto.OmsUpdateStatusParam;
@@ -11,11 +14,11 @@ import java.util.List;
  * 退货申请管理Service
  * Created by macro on 2018/10/18.
  */
-public interface OmsOrderReturnApplyService {
+public interface OmsOrderReturnApplyService extends IService<OmsOrderReturnApply> {
     /**
      * 分页查询申请
      */
-    List<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum);
+    IPage<OmsOrderReturnApply> list(OmsReturnApplyQueryParam queryParam, Integer pageSize, Integer pageNum);
 
     /**
      * 批量删除申请

@@ -45,7 +45,7 @@ public class MemberAttentionServiceImpl implements MemberAttentionService {
         MemberBrandAttention findAttention = memberBrandAttentionRepository.findByMemberIdAndBrandId(memberBrandAttention.getMemberId(), memberBrandAttention.getBrandId());
         if (findAttention == null) {
             if(sqlEnable){
-                PmsBrand brand = brandMapper.selectByPrimaryKey(memberBrandAttention.getBrandId());
+                PmsBrand brand = brandMapper.selectById(memberBrandAttention.getBrandId());
                 if(brand==null){
                     return 0;
                 }else{

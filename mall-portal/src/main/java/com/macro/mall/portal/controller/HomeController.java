@@ -1,5 +1,6 @@
 package com.macro.mall.portal.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
@@ -36,9 +37,9 @@ public class HomeController {
     @Operation(summary = "分页获取推荐商品")
     @RequestMapping(value = "/recommendProductList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<PmsProduct>> recommendProductList(@RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
+    public CommonResult<IPage<PmsProduct>> recommendProductList(@RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
                                                                @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProduct> productList = homeService.recommendProductList(pageSize, pageNum);
+        IPage<PmsProduct> productList = homeService.recommendProductList(pageSize, pageNum);
         return CommonResult.success(productList);
     }
 
@@ -53,10 +54,10 @@ public class HomeController {
     @Operation(summary = "根据分类获取专题")
     @RequestMapping(value = "/subjectList", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult<List<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,
+    public CommonResult<IPage<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,
                                                          @RequestParam(value = "pageSize", defaultValue = "4") Integer pageSize,
                                                          @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<CmsSubject> subjectList = homeService.getSubjectList(cateId,pageSize,pageNum);
+        IPage<CmsSubject> subjectList = homeService.getSubjectList(cateId,pageSize,pageNum);
         return CommonResult.success(subjectList);
     }
 

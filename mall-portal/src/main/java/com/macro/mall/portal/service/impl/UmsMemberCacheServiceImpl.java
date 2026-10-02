@@ -32,9 +32,9 @@ public class UmsMemberCacheServiceImpl implements UmsMemberCacheService {
 
     @Override
     public void delMember(Long memberId) {
-        UmsMember umsMember = memberMapper.selectByPrimaryKey(memberId);
+        UmsMember umsMember = memberMapper.selectById(memberId);
         if (umsMember != null) {
-            String key = REDIS_DATABASE + ":" + REDIS_KEY_MEMBER + ":" + umsMember.getUsername();
+            String key = REDIS_DATABASE + ":" + REDIS_KEY_MEMBER + ":" + umsMember.getPhone();
             redisService.del(key);
         }
     }
@@ -47,7 +47,7 @@ public class UmsMemberCacheServiceImpl implements UmsMemberCacheService {
 
     @Override
     public void setMember(UmsMember member) {
-        String key = REDIS_DATABASE + ":" + REDIS_KEY_MEMBER + ":" + member.getUsername();
+        String key = REDIS_DATABASE + ":" + REDIS_KEY_MEMBER + ":" + member.getPhone();
         redisService.set(key, member, REDIS_EXPIRE);
     }
 

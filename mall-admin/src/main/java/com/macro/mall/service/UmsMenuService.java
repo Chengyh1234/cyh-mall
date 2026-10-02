@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.dto.UmsMenuNode;
 import com.macro.mall.model.UmsMenu;
 
@@ -9,7 +12,7 @@ import java.util.List;
  * 后台菜单管理Service
  * Created by macro on 2020/2/2.
  */
-public interface UmsMenuService {
+public interface UmsMenuService extends IService<UmsMenu> {
     /**
      * 创建后台菜单
      */
@@ -33,7 +36,7 @@ public interface UmsMenuService {
     /**
      * 分页查询后台菜单
      */
-    List<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum);
+    IPage<UmsMenu> list(Long parentId, Integer pageSize, Integer pageNum);
 
     /**
      * 树形结构返回所有菜单列表

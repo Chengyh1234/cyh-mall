@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.UmsMenu;
 import com.macro.mall.model.UmsResource;
 import com.macro.mall.model.UmsRole;
@@ -11,7 +14,7 @@ import java.util.List;
  * 后台角色管理Service
  * Created by macro on 2018/9/30.
  */
-public interface UmsRoleService {
+public interface UmsRoleService extends IService<UmsRole> {
     /**
      * 添加角色
      */
@@ -28,14 +31,9 @@ public interface UmsRoleService {
     int delete(List<Long> ids);
 
     /**
-     * 获取所有角色列表
-     */
-    List<UmsRole> list();
-
-    /**
      * 分页获取角色列表
      */
-    List<UmsRole> list(String keyword, Integer pageSize, Integer pageNum);
+    IPage<UmsRole> list(String keyword, Integer pageSize, Integer pageNum);
 
     /**
      * 根据管理员ID获取对应菜单

@@ -1,7 +1,10 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dao.SmsCouponDao;
 import com.macro.mall.dao.SmsCouponProductCategoryRelationDao;
 import com.macro.mall.dao.SmsCouponProductRelationDao;
@@ -21,9 +24,7 @@ import java.util.List;
  * Created by macro on 2018/8/28.
  */
 @Service
-public class SmsCouponServiceImpl implements SmsCouponService {
-    @Autowired
-    private SmsCouponMapper couponMapper;
+public class SmsCouponServiceImpl extends ServiceImpl<SmsCouponMapper, SmsCoupon> implements SmsCouponService {
     @Autowired
     private SmsCouponProductRelationMapper productRelationMapper;
     @Autowired
@@ -40,7 +41,7 @@ public class SmsCouponServiceImpl implements SmsCouponService {
         couponParam.setUseCount(0);
         couponParam.setReceiveCount(0);
         //插入优惠券表
-        int count = couponMapper.insert(couponParam);
+        int count = baseMapper.insert(couponParam);
         //插入优惠券和商品关系表
         if(couponParam.getUseType().equals(2)){
             for(SmsCouponProductRelation productRelation:couponParam.getProductRelationList()){
@@ -61,7 +62,7 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     @Override
     public int delete(Long id) {
         //删除优惠券
-        int count = couponMapper.deleteByPrimaryKey(id);
+        int count = baseMapper.deleteById(id);
         //删除商品关联
         deleteProductRelation(id);
         //删除商品分类关联
@@ -70,21 +71,19 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     }
 
     private void deleteProductCategoryRelation(Long id) {
-        SmsCouponProductCategoryRelationExample productCategoryRelationExample = new SmsCouponProductCategoryRelationExample();
-        productCategoryRelationExample.createCriteria().andCouponIdEqualTo(id);
-        productCategoryRelationMapper.deleteByExample(productCategoryRelationExample);
+        productCategoryRelationMapper.delete(new LambdaQueryWrapper<SmsCouponProductCategoryRelation>()
+                .eq(SmsCouponProductCategoryRelation::getCouponId, id));
     }
 
     private void deleteProductRelation(Long id) {
-        SmsCouponProductRelationExample productRelationExample = new SmsCouponProductRelationExample();
-        productRelationExample.createCriteria().andCouponIdEqualTo(id);
-        productRelationMapper.deleteByExample(productRelationExample);
+        productRelationMapper.delete(new LambdaQueryWrapper<SmsCouponProductRelation>()
+                .eq(SmsCouponProductRelation::getCouponId, id));
     }
 
     @Override
     public int update(Long id, SmsCouponParam couponParam) {
         couponParam.setId(id);
-        int count =couponMapper.updateByPrimaryKey(couponParam);
+        int count = baseMapper.updateById(couponParam);
         //删除后插入优惠券和商品关系表
         if(couponParam.getUseType().equals(2)){
             for(SmsCouponProductRelation productRelation:couponParam.getProductRelationList()){
@@ -105,17 +104,15 @@ public class SmsCouponServiceImpl implements SmsCouponService {
     }
 
     @Override
-    public List<SmsCoupon> list(String name, Integer type, Integer pageSize, Integer pageNum) {
-        SmsCouponExample example = new SmsCouponExample();
-        SmsCouponExample.Criteria criteria = example.createCriteria();
+    public IPage<SmsCoupon> list(String name, Integer type, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<SmsCoupon> wrapper = new LambdaQueryWrapper<>();
         if(!StrUtil.isEmpty(name)){
-            criteria.andNameLike("%"+name+"%");
+            wrapper.like(SmsCoupon::getName, name);
         }
         if(type!=null){
-            criteria.andTypeEqualTo(type);
+            wrapper.eq(SmsCoupon::getType, type);
         }
-        PageHelper.startPage(pageNum,pageSize);
-        return couponMapper.selectByExample(example);
+        return this.page(new Page<>(pageNum,pageSize), wrapper);
     }
 
     @Override

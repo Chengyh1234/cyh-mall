@@ -2,12 +2,30 @@ package com.macro.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
-import com.macro.mall.dao.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
+import com.macro.mall.dao.PmsMemberPriceDao;
+import com.macro.mall.dao.PmsProductAttributeValueDao;
+import com.macro.mall.dao.PmsProductDao;
+import com.macro.mall.dao.PmsProductFullReductionDao;
+import com.macro.mall.dao.PmsProductLadderDao;
+import com.macro.mall.dao.PmsProductVertifyRecordDao;
+import com.macro.mall.dao.PmsSkuStockDao;
+import com.macro.mall.dao.CmsPrefrenceAreaProductRelationDao;
+import com.macro.mall.dao.CmsSubjectProductRelationDao;
 import com.macro.mall.dto.PmsProductParam;
 import com.macro.mall.dto.PmsProductQueryParam;
 import com.macro.mall.dto.PmsProductResult;
-import com.macro.mall.mapper.*;
+import com.macro.mall.mapper.CmsPrefrenceAreaProductRelationMapper;
+import com.macro.mall.mapper.CmsSubjectProductRelationMapper;
+import com.macro.mall.mapper.PmsMemberPriceMapper;
+import com.macro.mall.mapper.PmsProductAttributeValueMapper;
+import com.macro.mall.mapper.PmsProductFullReductionMapper;
+import com.macro.mall.mapper.PmsProductLadderMapper;
+import com.macro.mall.mapper.PmsProductMapper;
+import com.macro.mall.mapper.PmsSkuStockMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
 import org.slf4j.Logger;
@@ -18,6 +36,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,10 +47,8 @@ import java.util.stream.Collectors;
  * Created by macro on 2018/4/26.
  */
 @Service
-public class PmsProductServiceImpl implements PmsProductService {
+public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProduct> implements PmsProductService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PmsProductServiceImpl.class);
-    @Autowired
-    private PmsProductMapper productMapper;
     @Autowired
     private PmsMemberPriceDao memberPriceDao;
     @Autowired
@@ -71,7 +88,7 @@ public class PmsProductServiceImpl implements PmsProductService {
         //创建商品
         PmsProduct product = productParam;
         product.setId(null);
-        productMapper.insertSelective(product);
+        baseMapper.insert(product);
         //根据促销类型设置价格：会员价格、阶梯价格、满减价格
         Long productId = product.getId();
         //会员价格
@@ -123,38 +140,26 @@ public class PmsProductServiceImpl implements PmsProductService {
         //更新商品信息
         PmsProduct product = productParam;
         product.setId(id);
-        productMapper.updateByPrimaryKeySelective(product);
+        baseMapper.updateById(product);
         //会员价格
-        PmsMemberPriceExample pmsMemberPriceExample = new PmsMemberPriceExample();
-        pmsMemberPriceExample.createCriteria().andProductIdEqualTo(id);
-        memberPriceMapper.deleteByExample(pmsMemberPriceExample);
+        memberPriceMapper.delete(new LambdaQueryWrapper<PmsMemberPrice>().eq(PmsMemberPrice::getProductId, id));
         relateAndInsertList(memberPriceDao, productParam.getMemberPriceList(), id);
         //阶梯价格
-        PmsProductLadderExample ladderExample = new PmsProductLadderExample();
-        ladderExample.createCriteria().andProductIdEqualTo(id);
-        productLadderMapper.deleteByExample(ladderExample);
+        productLadderMapper.delete(new LambdaQueryWrapper<PmsProductLadder>().eq(PmsProductLadder::getProductId, id));
         relateAndInsertList(productLadderDao, productParam.getProductLadderList(), id);
         //满减价格
-        PmsProductFullReductionExample fullReductionExample = new PmsProductFullReductionExample();
-        fullReductionExample.createCriteria().andProductIdEqualTo(id);
-        productFullReductionMapper.deleteByExample(fullReductionExample);
+        productFullReductionMapper.delete(new LambdaQueryWrapper<PmsProductFullReduction>().eq(PmsProductFullReduction::getProductId, id));
         relateAndInsertList(productFullReductionDao, productParam.getProductFullReductionList(), id);
         //修改sku库存信息
         handleUpdateSkuStockList(id, productParam);
         //修改商品参数,添加自定义商品规格
-        PmsProductAttributeValueExample productAttributeValueExample = new PmsProductAttributeValueExample();
-        productAttributeValueExample.createCriteria().andProductIdEqualTo(id);
-        productAttributeValueMapper.deleteByExample(productAttributeValueExample);
+        productAttributeValueMapper.delete(new LambdaQueryWrapper<PmsProductAttributeValue>().eq(PmsProductAttributeValue::getProductId, id));
         relateAndInsertList(productAttributeValueDao, productParam.getProductAttributeValueList(), id);
         //关联专题
-        CmsSubjectProductRelationExample subjectProductRelationExample = new CmsSubjectProductRelationExample();
-        subjectProductRelationExample.createCriteria().andProductIdEqualTo(id);
-        subjectProductRelationMapper.deleteByExample(subjectProductRelationExample);
+        subjectProductRelationMapper.delete(new LambdaQueryWrapper<CmsSubjectProductRelation>().eq(CmsSubjectProductRelation::getProductId, id));
         relateAndInsertList(subjectProductRelationDao, productParam.getSubjectProductRelationList(), id);
         //关联优选
-        CmsPrefrenceAreaProductRelationExample prefrenceAreaExample = new CmsPrefrenceAreaProductRelationExample();
-        prefrenceAreaExample.createCriteria().andProductIdEqualTo(id);
-        prefrenceAreaProductRelationMapper.deleteByExample(prefrenceAreaExample);
+        prefrenceAreaProductRelationMapper.delete(new LambdaQueryWrapper<CmsPrefrenceAreaProductRelation>().eq(CmsPrefrenceAreaProductRelation::getProductId, id));
         relateAndInsertList(prefrenceAreaProductRelationDao, productParam.getPrefrenceAreaProductRelationList(), id);
         count = 1;
         return count;
@@ -165,15 +170,15 @@ public class PmsProductServiceImpl implements PmsProductService {
         List<PmsSkuStock> currSkuList = productParam.getSkuStockList();
         //当前没有sku直接删除
         if(CollUtil.isEmpty(currSkuList)){
-            PmsSkuStockExample skuStockExample = new PmsSkuStockExample();
-            skuStockExample.createCriteria().andProductIdEqualTo(id);
-            skuStockMapper.deleteByExample(skuStockExample);
+            LambdaQueryWrapper<PmsSkuStock> skuStockWrapper = new LambdaQueryWrapper<>();
+            skuStockWrapper.eq(PmsSkuStock::getProductId, id);
+            skuStockMapper.delete(skuStockWrapper);
             return;
         }
         //获取初始sku信息
-        PmsSkuStockExample skuStockExample = new PmsSkuStockExample();
-        skuStockExample.createCriteria().andProductIdEqualTo(id);
-        List<PmsSkuStock> oriStuList = skuStockMapper.selectByExample(skuStockExample);
+        LambdaQueryWrapper<PmsSkuStock> skuStockWrapper = new LambdaQueryWrapper<>();
+        skuStockWrapper.eq(PmsSkuStock::getProductId, id);
+        List<PmsSkuStock> oriStuList = skuStockMapper.selectList(skuStockWrapper);
         //获取新增sku信息
         List<PmsSkuStock> insertSkuList = currSkuList.stream().filter(item->item.getId()==null).collect(Collectors.toList());
         //获取需要更新的sku信息
@@ -190,59 +195,55 @@ public class PmsProductServiceImpl implements PmsProductService {
         //删除sku
         if(CollUtil.isNotEmpty(removeSkuList)){
             List<Long> removeSkuIds = removeSkuList.stream().map(PmsSkuStock::getId).collect(Collectors.toList());
-            PmsSkuStockExample removeExample = new PmsSkuStockExample();
-            removeExample.createCriteria().andIdIn(removeSkuIds);
-            skuStockMapper.deleteByExample(removeExample);
+            LambdaQueryWrapper<PmsSkuStock> removeWrapper = new LambdaQueryWrapper<>();
+            removeWrapper.in(PmsSkuStock::getId, removeSkuIds);
+            skuStockMapper.delete(removeWrapper);
         }
         //修改sku
         if(CollUtil.isNotEmpty(updateSkuList)){
             for (PmsSkuStock pmsSkuStock : updateSkuList) {
-                skuStockMapper.updateByPrimaryKeySelective(pmsSkuStock);
+                skuStockMapper.updateById(pmsSkuStock);
             }
         }
 
     }
 
     @Override
-    public List<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        PmsProductExample productExample = new PmsProductExample();
-        PmsProductExample.Criteria criteria = productExample.createCriteria();
-        criteria.andDeleteStatusEqualTo(0);
+    public IPage<PmsProduct> list(PmsProductQueryParam productQueryParam, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmsProduct::getDeleteStatus, 0);
         if (productQueryParam.getPublishStatus() != null) {
-            criteria.andPublishStatusEqualTo(productQueryParam.getPublishStatus());
+            wrapper.eq(PmsProduct::getPublishStatus, productQueryParam.getPublishStatus());
         }
         if (productQueryParam.getVerifyStatus() != null) {
-            criteria.andVerifyStatusEqualTo(productQueryParam.getVerifyStatus());
+            wrapper.eq(PmsProduct::getVerifyStatus, productQueryParam.getVerifyStatus());
         }
         if (!StrUtil.isEmpty(productQueryParam.getKeyword())) {
-            criteria.andNameLike("%" + productQueryParam.getKeyword() + "%");
+            wrapper.like(PmsProduct::getName, productQueryParam.getKeyword());
         }
         if (!StrUtil.isEmpty(productQueryParam.getProductSn())) {
-            criteria.andProductSnEqualTo(productQueryParam.getProductSn());
+            wrapper.eq(PmsProduct::getProductSn, productQueryParam.getProductSn());
         }
         if (productQueryParam.getBrandId() != null) {
-            criteria.andBrandIdEqualTo(productQueryParam.getBrandId());
+            wrapper.eq(PmsProduct::getBrandId, productQueryParam.getBrandId());
         }
         if (productQueryParam.getProductCategoryId() != null) {
-            criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
+            wrapper.eq(PmsProduct::getProductCategoryId, productQueryParam.getProductCategoryId());
         }
-        return productMapper.selectByExample(productExample);
+        return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 
     @Override
     public int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail) {
         PmsProduct product = new PmsProduct();
         product.setVerifyStatus(verifyStatus);
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andIdIn(ids);
         List<PmsProductVertifyRecord> list = new ArrayList<>();
-        int count = productMapper.updateByExampleSelective(product, example);
+        int count = baseMapper.update(product, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
         //修改完审核状态后插入审核记录
         for (Long id : ids) {
             PmsProductVertifyRecord record = new PmsProductVertifyRecord();
             record.setProductId(id);
-            record.setCreateTime(new Date());
+            record.setCreateTime(LocalDateTime.now());
             record.setDetail(detail);
             record.setStatus(verifyStatus);
             record.setVertifyMan("test");
@@ -256,48 +257,42 @@ public class PmsProductServiceImpl implements PmsProductService {
     public int updatePublishStatus(List<Long> ids, Integer publishStatus) {
         PmsProduct record = new PmsProduct();
         record.setPublishStatus(publishStatus);
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andIdIn(ids);
-        return productMapper.updateByExampleSelective(record, example);
+        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
         PmsProduct record = new PmsProduct();
         record.setRecommandStatus(recommendStatus);
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andIdIn(ids);
-        return productMapper.updateByExampleSelective(record, example);
+        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
     }
 
     @Override
     public int updateNewStatus(List<Long> ids, Integer newStatus) {
         PmsProduct record = new PmsProduct();
         record.setNewStatus(newStatus);
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andIdIn(ids);
-        return productMapper.updateByExampleSelective(record, example);
+        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
     }
 
     @Override
     public int updateDeleteStatus(List<Long> ids, Integer deleteStatus) {
         PmsProduct record = new PmsProduct();
         record.setDeleteStatus(deleteStatus);
-        PmsProductExample example = new PmsProductExample();
-        example.createCriteria().andIdIn(ids);
-        return productMapper.updateByExampleSelective(record, example);
+        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
     }
 
     @Override
     public List<PmsProduct> list(String keyword) {
-        PmsProductExample productExample = new PmsProductExample();
-        PmsProductExample.Criteria criteria = productExample.createCriteria();
-        criteria.andDeleteStatusEqualTo(0);
+        LambdaQueryWrapper<PmsProduct> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PmsProduct::getDeleteStatus, 0);
         if(!StrUtil.isEmpty(keyword)){
-            criteria.andNameLike("%" + keyword + "%");
-            productExample.or().andDeleteStatusEqualTo(0).andProductSnLike("%" + keyword + "%");
+            //(delete_status=0 AND name LIKE kw) OR (delete_status=0 AND product_sn LIKE kw)
+            wrapper.and(w -> w.like(PmsProduct::getName, keyword)
+                    .or()
+                    .eq(PmsProduct::getDeleteStatus, 0)
+                    .like(PmsProduct::getProductSn, keyword));
         }
-        return productMapper.selectByExample(productExample);
+        return this.list(wrapper);
     }
 
     /**

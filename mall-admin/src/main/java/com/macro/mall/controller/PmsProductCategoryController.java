@@ -6,6 +6,7 @@ import com.macro.mall.dto.PmsProductCategoryParam;
 import com.macro.mall.dto.PmsProductCategoryWithChildrenItem;
 import com.macro.mall.model.PmsProductCategory;
 import com.macro.mall.service.PmsProductCategoryService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class PmsProductCategoryController {
     public CommonResult<CommonPage<PmsProductCategory>> getList(@PathVariable Long parentId,
                                                                 @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                                 @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<PmsProductCategory> productCategoryList = productCategoryService.getList(parentId, pageSize, pageNum);
+        IPage<PmsProductCategory> productCategoryList = productCategoryService.getList(parentId, pageSize, pageNum);
         return CommonResult.success(CommonPage.restPage(productCategoryList));
     }
 

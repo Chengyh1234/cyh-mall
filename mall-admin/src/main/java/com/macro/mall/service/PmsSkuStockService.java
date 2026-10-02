@@ -1,5 +1,7 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.model.PmsSkuStock;
 
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
  * 商品SKU库存管理Service
  * Created by macro on 2018/4/27.
  */
-public interface PmsSkuStockService {
+public interface PmsSkuStockService extends IService<PmsSkuStock> {
     /**
      * 根据产品id和skuCode关键字模糊搜索
      */

@@ -42,7 +42,7 @@ public class MemberCollectionServiceImpl implements MemberCollectionService {
         MemberProductCollection findCollection = productCollectionRepository.findByMemberIdAndProductId(productCollection.getMemberId(), productCollection.getProductId());
         if (findCollection == null) {
             if (sqlEnable) {
-                PmsProduct product = productMapper.selectByPrimaryKey(productCollection.getProductId());
+                PmsProduct product = productMapper.selectById(productCollection.getProductId());
                 if (product == null || product.getDeleteStatus() == 1) {
                     return 0;
                 }

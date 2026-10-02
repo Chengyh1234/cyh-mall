@@ -1,7 +1,10 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dao.UmsRoleDao;
 import com.macro.mall.mapper.UmsRoleMapper;
 import com.macro.mall.mapper.UmsRoleMenuRelationMapper;
@@ -12,7 +15,7 @@ import com.macro.mall.service.UmsRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,9 +23,7 @@ import java.util.List;
  * Created by macro on 2018/9/30.
  */
 @Service
-public class UmsRoleServiceImpl implements UmsRoleService {
-    @Autowired
-    private UmsRoleMapper roleMapper;
+public class UmsRoleServiceImpl extends ServiceImpl<UmsRoleMapper, UmsRole> implements UmsRoleService {
     @Autowired
     private UmsRoleMenuRelationMapper roleMenuRelationMapper;
     @Autowired
@@ -33,40 +34,37 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     private UmsAdminCacheService adminCacheService;
     @Override
     public int create(UmsRole role) {
-        role.setCreateTime(new Date());
+        role.setCreateTime(LocalDateTime.now());
         role.setAdminCount(0);
         role.setSort(0);
-        return roleMapper.insert(role);
+        return baseMapper.insert(role);
     }
 
     @Override
     public int update(Long id, UmsRole role) {
         role.setId(id);
-        return roleMapper.updateByPrimaryKeySelective(role);
+        return baseMapper.updateById(role);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        UmsRoleExample example = new UmsRoleExample();
-        example.createCriteria().andIdIn(ids);
-        int count = roleMapper.deleteByExample(example);
+        int count = baseMapper.delete(new LambdaQueryWrapper<UmsRole>().in(UmsRole::getId, ids));
         adminCacheService.delResourceListByRoleIds(ids);
         return count;
     }
 
     @Override
     public List<UmsRole> list() {
-        return roleMapper.selectByExample(new UmsRoleExample());
+        return this.list(new LambdaQueryWrapper<>());
     }
 
     @Override
-    public List<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        UmsRoleExample example = new UmsRoleExample();
+    public IPage<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<UmsRole> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(keyword)) {
-            example.createCriteria().andNameLike("%" + keyword + "%");
+            wrapper.like(UmsRole::getName, keyword);
         }
-        return roleMapper.selectByExample(example);
+        return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 
     @Override
@@ -87,9 +85,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     @Override
     public int allocMenu(Long roleId, List<Long> menuIds) {
         //先删除原有关系
-        UmsRoleMenuRelationExample example=new UmsRoleMenuRelationExample();
-        example.createCriteria().andRoleIdEqualTo(roleId);
-        roleMenuRelationMapper.deleteByExample(example);
+        roleMenuRelationMapper.delete(new LambdaQueryWrapper<UmsRoleMenuRelation>().eq(UmsRoleMenuRelation::getRoleId, roleId));
         //批量插入新关系
         for (Long menuId : menuIds) {
             UmsRoleMenuRelation relation = new UmsRoleMenuRelation();
@@ -103,9 +99,7 @@ public class UmsRoleServiceImpl implements UmsRoleService {
     @Override
     public int allocResource(Long roleId, List<Long> resourceIds) {
         //先删除原有关系
-        UmsRoleResourceRelationExample example=new UmsRoleResourceRelationExample();
-        example.createCriteria().andRoleIdEqualTo(roleId);
-        roleResourceRelationMapper.deleteByExample(example);
+        roleResourceRelationMapper.delete(new LambdaQueryWrapper<UmsRoleResourceRelation>().eq(UmsRoleResourceRelation::getRoleId, roleId));
         //批量插入新关系
         for (Long resourceId : resourceIds) {
             UmsRoleResourceRelation relation = new UmsRoleResourceRelation();

@@ -1,17 +1,17 @@
 package com.macro.mall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.mapper.SmsHomeAdvertiseMapper;
 import com.macro.mall.model.SmsHomeAdvertise;
-import com.macro.mall.model.SmsHomeAdvertiseExample;
 import com.macro.mall.service.SmsHomeAdvertiseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -19,22 +19,18 @@ import java.util.List;
  * Created by macro on 2018/11/7.
  */
 @Service
-public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
-    @Autowired
-    private SmsHomeAdvertiseMapper advertiseMapper;
+public class SmsHomeAdvertiseServiceImpl extends ServiceImpl<SmsHomeAdvertiseMapper, SmsHomeAdvertise> implements SmsHomeAdvertiseService {
 
     @Override
     public int create(SmsHomeAdvertise advertise) {
         advertise.setClickCount(0);
         advertise.setOrderCount(0);
-        return advertiseMapper.insert(advertise);
+        return baseMapper.insert(advertise);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        SmsHomeAdvertiseExample example = new SmsHomeAdvertiseExample();
-        example.createCriteria().andIdIn(ids);
-        return advertiseMapper.deleteByExample(example);
+        return baseMapper.delete(new LambdaQueryWrapper<SmsHomeAdvertise>().in(SmsHomeAdvertise::getId, ids));
     }
 
     @Override
@@ -42,52 +38,36 @@ public class SmsHomeAdvertiseServiceImpl implements SmsHomeAdvertiseService {
         SmsHomeAdvertise record = new SmsHomeAdvertise();
         record.setId(id);
         record.setStatus(status);
-        return advertiseMapper.updateByPrimaryKeySelective(record);
+        return baseMapper.updateById(record);
     }
 
     @Override
     public SmsHomeAdvertise getItem(Long id) {
-        return advertiseMapper.selectByPrimaryKey(id);
+        return this.getById(id);
     }
 
     @Override
     public int update(Long id, SmsHomeAdvertise advertise) {
         advertise.setId(id);
-        return advertiseMapper.updateByPrimaryKeySelective(advertise);
+        return baseMapper.updateById(advertise);
     }
 
     @Override
-    public List<SmsHomeAdvertise> list(String name, Integer type, String endTime, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
-        SmsHomeAdvertiseExample example = new SmsHomeAdvertiseExample();
-        SmsHomeAdvertiseExample.Criteria criteria = example.createCriteria();
+    public IPage<SmsHomeAdvertise> list(String name, Integer type, String endTime, Integer pageSize, Integer pageNum) {
+        LambdaQueryWrapper<SmsHomeAdvertise> wrapper = new LambdaQueryWrapper<>();
         if (!StrUtil.isEmpty(name)) {
-            criteria.andNameLike("%" + name + "%");
+            wrapper.like(SmsHomeAdvertise::getName, name);
         }
         if (type != null) {
-            criteria.andTypeEqualTo(type);
+            wrapper.eq(SmsHomeAdvertise::getType, type);
         }
         if (!StrUtil.isEmpty(endTime)) {
-            String startStr = endTime + " 00:00:00";
-            String endStr = endTime + " 23:59:59";
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date start = null;
-            try {
-                start = sdf.parse(startStr);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            Date end = null;
-            try {
-                end = sdf.parse(endStr);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            if (start != null && end != null) {
-                criteria.andEndTimeBetween(start, end);
-            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime start = LocalDateTime.parse(endTime + " 00:00:00", formatter);
+            LocalDateTime end = LocalDateTime.parse(endTime + " 23:59:59", formatter);
+            wrapper.between(SmsHomeAdvertise::getEndTime, start, end);
         }
-        example.setOrderByClause("sort desc");
-        return advertiseMapper.selectByExample(example);
+        wrapper.orderByDesc(SmsHomeAdvertise::getSort);
+        return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 }

@@ -1,11 +1,12 @@
 package com.macro.mall.service.impl;
 
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.dao.PmsProductAttributeCategoryDao;
 import com.macro.mall.dto.PmsProductAttributeCategoryItem;
 import com.macro.mall.mapper.PmsProductAttributeCategoryMapper;
 import com.macro.mall.model.PmsProductAttributeCategory;
-import com.macro.mall.model.PmsProductAttributeCategoryExample;
 import com.macro.mall.service.PmsProductAttributeCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,7 @@ import java.util.List;
  * Created by macro on 2018/4/26.
  */
 @Service
-public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttributeCategoryService {
-    @Autowired
-    private PmsProductAttributeCategoryMapper productAttributeCategoryMapper;
+public class PmsProductAttributeCategoryServiceImpl extends ServiceImpl<PmsProductAttributeCategoryMapper, PmsProductAttributeCategory> implements PmsProductAttributeCategoryService {
     @Autowired
     private PmsProductAttributeCategoryDao productAttributeCategoryDao;
 
@@ -27,7 +26,7 @@ public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttribu
     public int create(String name) {
         PmsProductAttributeCategory productAttributeCategory = new PmsProductAttributeCategory();
         productAttributeCategory.setName(name);
-        return productAttributeCategoryMapper.insertSelective(productAttributeCategory);
+        return baseMapper.insert(productAttributeCategory);
     }
 
     @Override
@@ -35,23 +34,22 @@ public class PmsProductAttributeCategoryServiceImpl implements PmsProductAttribu
         PmsProductAttributeCategory productAttributeCategory = new PmsProductAttributeCategory();
         productAttributeCategory.setName(name);
         productAttributeCategory.setId(id);
-        return productAttributeCategoryMapper.updateByPrimaryKeySelective(productAttributeCategory);
+        return baseMapper.updateById(productAttributeCategory);
     }
 
     @Override
     public int delete(Long id) {
-        return productAttributeCategoryMapper.deleteByPrimaryKey(id);
+        return baseMapper.deleteById(id);
     }
 
     @Override
     public PmsProductAttributeCategory getItem(Long id) {
-        return productAttributeCategoryMapper.selectByPrimaryKey(id);
+        return this.getById(id);
     }
 
     @Override
-    public List<PmsProductAttributeCategory> getList(Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        return productAttributeCategoryMapper.selectByExample(new PmsProductAttributeCategoryExample());
+    public IPage<PmsProductAttributeCategory> getList(Integer pageSize, Integer pageNum) {
+        return this.page(new Page<>(pageNum, pageSize));
     }
 
     @Override

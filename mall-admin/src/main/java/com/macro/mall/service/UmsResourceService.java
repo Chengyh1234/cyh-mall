@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.UmsResource;
 
 import java.util.List;
@@ -8,7 +11,7 @@ import java.util.List;
  * 后台资源管理Service
  * Created by macro on 2020/2/2.
  */
-public interface UmsResourceService {
+public interface UmsResourceService extends IService<UmsResource> {
     /**
      * 添加资源
      */
@@ -32,7 +35,7 @@ public interface UmsResourceService {
     /**
      * 分页查询资源
      */
-    List<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum);
+    IPage<UmsResource> list(Long categoryId, String nameKeyword, String urlKeyword, Integer pageSize, Integer pageNum);
 
     /**
      * 查询全部资源

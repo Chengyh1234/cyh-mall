@@ -1,13 +1,13 @@
 package com.macro.mall.portal.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.mapper.UmsMemberLevelMapper;
 import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.UmsMember;
-import com.macro.mall.model.UmsMemberExample;
 import com.macro.mall.model.UmsMemberLevel;
-import com.macro.mall.model.UmsMemberLevelExample;
 import com.macro.mall.portal.domain.MemberDetails;
 import com.macro.mall.portal.service.UmsMemberCacheService;
 import com.macro.mall.portal.service.UmsMemberService;
@@ -28,7 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -37,14 +37,12 @@ import java.util.Random;
  * Created by macro on 2018/8/3.
  */
 @Service
-public class UmsMemberServiceImpl implements UmsMemberService {
+public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember> implements UmsMemberService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsMemberServiceImpl.class);
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private UmsMemberMapper memberMapper;
     @Autowired
     private UmsMemberLevelMapper memberLevelMapper;
     @Autowired
@@ -55,12 +53,11 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     private Long AUTH_CODE_EXPIRE_SECONDS;
 
     @Override
-    public UmsMember getByUsername(String username) {
-        UmsMember member = memberCacheService.getMember(username);
+    public UmsMember getByPhone(String phone) {
+        UmsMember member = memberCacheService.getMember(phone);
         if(member!=null) return member;
-        UmsMemberExample example = new UmsMemberExample();
-        example.createCriteria().andUsernameEqualTo(username);
-        List<UmsMember> memberList = memberMapper.selectByExample(example);
+        List<UmsMember> memberList = this.list(new LambdaQueryWrapper<UmsMember>()
+                .eq(UmsMember::getPhone, phone));
         if (!CollectionUtils.isEmpty(memberList)) {
             member = memberList.get(0);
             memberCacheService.setMember(member);
@@ -71,38 +68,35 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     @Override
     public UmsMember getById(Long id) {
-        return memberMapper.selectByPrimaryKey(id);
+        return baseMapper.selectById(id);
     }
 
     @Override
-    public void register(String username, String password, String telephone, String authCode) {
+    public void register(String phone, String password, String authCode) {
         //验证验证码
-        if(!verifyAuthCode(authCode,telephone)){
+        if(!verifyAuthCode(authCode,phone)){
             Asserts.fail("验证码错误");
         }
         //查询是否已有该用户
-        UmsMemberExample example = new UmsMemberExample();
-        example.createCriteria().andUsernameEqualTo(username);
-        example.or(example.createCriteria().andPhoneEqualTo(telephone));
-        List<UmsMember> umsMembers = memberMapper.selectByExample(example);
+        List<UmsMember> umsMembers = this.list(new LambdaQueryWrapper<UmsMember>()
+                .eq(UmsMember::getPhone, phone));
         if (!CollectionUtils.isEmpty(umsMembers)) {
             Asserts.fail("该用户已经存在");
         }
         //没有该用户进行添加操作
         UmsMember umsMember = new UmsMember();
-        umsMember.setUsername(username);
-        umsMember.setPhone(telephone);
+        umsMember.setPhone(phone);
+        umsMember.setNickname(phone);
         umsMember.setPassword(passwordEncoder.encode(password));
-        umsMember.setCreateTime(new Date());
+        umsMember.setCreateTime(LocalDateTime.now());
         umsMember.setStatus(1);
         //获取默认会员等级并设置
-        UmsMemberLevelExample levelExample = new UmsMemberLevelExample();
-        levelExample.createCriteria().andDefaultStatusEqualTo(1);
-        List<UmsMemberLevel> memberLevelList = memberLevelMapper.selectByExample(levelExample);
+        List<UmsMemberLevel> memberLevelList = memberLevelMapper.selectList(new LambdaQueryWrapper<UmsMemberLevel>()
+                .eq(UmsMemberLevel::getDefaultStatus, 1));
         if (!CollectionUtils.isEmpty(memberLevelList)) {
             umsMember.setMemberLevelId(memberLevelList.get(0).getId());
         }
-        memberMapper.insert(umsMember);
+        baseMapper.insert(umsMember);
         umsMember.setPassword(null);
     }
 
@@ -120,9 +114,8 @@ public class UmsMemberServiceImpl implements UmsMemberService {
 
     @Override
     public void updatePassword(String telephone, String password, String authCode) {
-        UmsMemberExample example = new UmsMemberExample();
-        example.createCriteria().andPhoneEqualTo(telephone);
-        List<UmsMember> memberList = memberMapper.selectByExample(example);
+        List<UmsMember> memberList = this.list(new LambdaQueryWrapper<UmsMember>()
+                .eq(UmsMember::getPhone, telephone));
         if(CollectionUtils.isEmpty(memberList)){
             Asserts.fail("该账号不存在");
         }
@@ -132,7 +125,7 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         }
         UmsMember umsMember = memberList.get(0);
         umsMember.setPassword(passwordEncoder.encode(password));
-        memberMapper.updateByPrimaryKeySelective(umsMember);
+        baseMapper.updateById(umsMember);
         memberCacheService.delMember(umsMember.getId());
     }
 
@@ -149,13 +142,13 @@ public class UmsMemberServiceImpl implements UmsMemberService {
         UmsMember record=new UmsMember();
         record.setId(id);
         record.setIntegration(integration);
-        memberMapper.updateByPrimaryKeySelective(record);
+        baseMapper.updateById(record);
         memberCacheService.delMember(id);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        UmsMember member = getByUsername(username);
+        UmsMember member = getByPhone(username);
         if(member!=null){
             return new MemberDetails(member);
         }
@@ -163,11 +156,11 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     }
 
     @Override
-    public String login(String username, String password) {
+    public String login(String phone, String password) {
         String token = null;
         //密码需要客户端加密后传递
         try {
-            UserDetails userDetails = loadUserByUsername(username);
+            UserDetails userDetails = loadUserByUsername(phone);
             if(!passwordEncoder.matches(password,userDetails.getPassword())){
                 throw new BadCredentialsException("密码不正确");
             }

@@ -20,11 +20,20 @@
     <dependencies>
         <dependency>
             <groupId>com.macro.mall</groupId>
+            <artifactId>mall-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.macro.mall</groupId>
             <artifactId>mall-mbg</artifactId>
         </dependency>
         <dependency>
             <groupId>com.macro.mall</groupId>
             <artifactId>mall-security</artifactId>
+        </dependency>
+        <!--MyBatis-Plus分页插件依赖-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser-4.9</artifactId>
         </dependency>
         <!--mongodb依赖配置-->
         <dependency>

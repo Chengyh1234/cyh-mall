@@ -5,6 +5,7 @@ import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.SmsFlashPromotionProduct;
 import com.macro.mall.model.SmsFlashPromotionProductRelation;
 import com.macro.mall.service.SmsFlashPromotionProductRelationService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class SmsFlashPromotionProductRelationController {
                                                                    @RequestParam(value = "flashPromotionSessionId") Long flashPromotionSessionId,
                                                                    @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
                                                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        List<SmsFlashPromotionProduct> flashPromotionProductList = relationService.list(flashPromotionId, flashPromotionSessionId, pageSize, pageNum);
+        IPage<SmsFlashPromotionProduct> flashPromotionProductList = relationService.list(flashPromotionId, flashPromotionSessionId, pageSize, pageNum);
         return CommonResult.success(CommonPage.restPage(flashPromotionProductList));
     }
 }

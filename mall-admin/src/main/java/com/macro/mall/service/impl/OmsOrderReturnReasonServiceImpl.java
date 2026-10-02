@@ -1,14 +1,15 @@
 package com.macro.mall.service.impl;
 
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.mapper.OmsOrderReturnReasonMapper;
 import com.macro.mall.model.OmsOrderReturnReason;
-import com.macro.mall.model.OmsOrderReturnReasonExample;
 import com.macro.mall.service.OmsOrderReturnReasonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -16,50 +17,43 @@ import java.util.List;
  * Created by macro on 2018/10/17.
  */
 @Service
-public class OmsOrderReturnReasonServiceImpl implements OmsOrderReturnReasonService {
-    @Autowired
-    private OmsOrderReturnReasonMapper returnReasonMapper;
+public class OmsOrderReturnReasonServiceImpl extends ServiceImpl<OmsOrderReturnReasonMapper, OmsOrderReturnReason> implements OmsOrderReturnReasonService {
+
     @Override
     public int create(OmsOrderReturnReason returnReason) {
-        returnReason.setCreateTime(new Date());
-        return returnReasonMapper.insert(returnReason);
+        returnReason.setCreateTime(LocalDateTime.now());
+        return baseMapper.insert(returnReason);
     }
 
     @Override
     public int update(Long id, OmsOrderReturnReason returnReason) {
         returnReason.setId(id);
-        return returnReasonMapper.updateByPrimaryKey(returnReason);
+        return baseMapper.updateById(returnReason);
     }
 
     @Override
     public int delete(List<Long> ids) {
-        OmsOrderReturnReasonExample example = new OmsOrderReturnReasonExample();
-        example.createCriteria().andIdIn(ids);
-        return returnReasonMapper.deleteByExample(example);
+        return baseMapper.delete(new LambdaQueryWrapper<OmsOrderReturnReason>().in(OmsOrderReturnReason::getId, ids));
     }
 
     @Override
-    public List<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum,pageSize);
-        OmsOrderReturnReasonExample example = new OmsOrderReturnReasonExample();
-        example.setOrderByClause("sort desc");
-        return returnReasonMapper.selectByExample(example);
+    public IPage<OmsOrderReturnReason> list(Integer pageSize, Integer pageNum) {
+        return this.page(new Page<>(pageNum, pageSize),
+                new LambdaQueryWrapper<OmsOrderReturnReason>().orderByDesc(OmsOrderReturnReason::getSort));
     }
 
     @Override
     public int updateStatus(List<Long> ids, Integer status) {
-        if(!status.equals(0)&&!status.equals(1)){
+        if (!status.equals(0) && !status.equals(1)) {
             return 0;
         }
         OmsOrderReturnReason record = new OmsOrderReturnReason();
         record.setStatus(status);
-        OmsOrderReturnReasonExample example = new OmsOrderReturnReasonExample();
-        example.createCriteria().andIdIn(ids);
-        return returnReasonMapper.updateByExampleSelective(record,example);
+        return baseMapper.update(record, new LambdaQueryWrapper<OmsOrderReturnReason>().in(OmsOrderReturnReason::getId, ids));
     }
 
     @Override
     public OmsOrderReturnReason getItem(Long id) {
-        return returnReasonMapper.selectByPrimaryKey(id);
+        return this.getById(id);
     }
 }

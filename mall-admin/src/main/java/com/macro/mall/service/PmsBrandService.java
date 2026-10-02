@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.dto.PmsBrandParam;
 import com.macro.mall.model.PmsBrand;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +13,7 @@ import java.util.List;
  * 商品品牌管理Service
  * Created by macro on 2018/4/26.
  */
-public interface PmsBrandService {
+public interface PmsBrandService extends IService<PmsBrand> {
     /**
      * 获取所有品牌
      */
@@ -40,7 +43,7 @@ public interface PmsBrandService {
     /**
      * 分页查询品牌
      */
-    List<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize);
+    IPage<PmsBrand> listBrand(String keyword, Integer showStatus, int pageNum, int pageSize);
 
     /**
      * 获取品牌详情

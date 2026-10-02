@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.CmsSubject;
 
 import java.util.List;
@@ -8,7 +11,7 @@ import java.util.List;
  * 商品专题管理Service
  * Created by macro on 2018/6/1.
  */
-public interface CmsSubjectService {
+public interface CmsSubjectService extends IService<CmsSubject> {
     /**
      * 查询所有专题
      */
@@ -17,5 +20,5 @@ public interface CmsSubjectService {
     /**
      * 分页查询专题
      */
-    List<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize);
+    IPage<CmsSubject> list(String keyword, Integer pageNum, Integer pageSize);
 }

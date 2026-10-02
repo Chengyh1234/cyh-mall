@@ -1,5 +1,7 @@
 package com.macro.mall.portal.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.model.PmsBrand;
 import com.macro.mall.model.PmsProduct;
@@ -10,7 +12,7 @@ import java.util.List;
  * 前台品牌管理Service
  * Created by macro on 2020/5/15.
  */
-public interface PmsPortalBrandService {
+public interface PmsPortalBrandService extends IService<PmsBrand> {
     /**
      * 分页获取推荐品牌
      */

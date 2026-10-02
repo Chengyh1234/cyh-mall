@@ -1,14 +1,15 @@
 package com.macro.mall.service;
 
-import com.macro.mall.model.SmsFlashPromotion;
+import com.baomidou.mybatisplus.spring.service.IService;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.macro.mall.model.SmsFlashPromotion;
 
 /**
  * 限时购活动管理Service
  * Created by macro on 2018/11/16.
  */
-public interface SmsFlashPromotionService {
+public interface SmsFlashPromotionService extends IService<SmsFlashPromotion> {
     /**
      * 添加活动
      */
@@ -37,5 +38,5 @@ public interface SmsFlashPromotionService {
     /**
      * 分页查询活动
      */
-    List<SmsFlashPromotion> list(String keyword, Integer pageSize, Integer pageNum);
+    IPage<SmsFlashPromotion> list(String keyword, Integer pageSize, Integer pageNum);
 }

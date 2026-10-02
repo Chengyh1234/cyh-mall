@@ -1,5 +1,8 @@
 package com.macro.mall.service;
 
+import com.baomidou.mybatisplus.spring.service.IService;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.SmsHomeBrand;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,7 +12,7 @@ import java.util.List;
  * 首页品牌管理Service
  * Created by macro on 2018/11/6.
  */
-public interface SmsHomeBrandService {
+public interface SmsHomeBrandService extends IService<SmsHomeBrand> {
     /**
      * 添加首页品牌推荐
      */
@@ -34,5 +37,5 @@ public interface SmsHomeBrandService {
     /**
      * 分页查询品牌推荐
      */
-    List<SmsHomeBrand> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum);
+    IPage<SmsHomeBrand> list(String brandName, Integer recommendStatus, Integer pageSize, Integer pageNum);
 }
