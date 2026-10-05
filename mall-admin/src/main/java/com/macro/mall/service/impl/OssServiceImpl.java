@@ -50,7 +50,7 @@ public class OssServiceImpl implements OssService {
 	public OssPolicyResult policy() {
 		OssPolicyResult result = new OssPolicyResult();
 		// 存储目录
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String dir = ALIYUN_OSS_DIR_PREFIX+sdf.format(new Date());
 		// 签名有效期
 		long expireEndTime = System.currentTimeMillis() + ALIYUN_OSS_EXPIRE * 1000;

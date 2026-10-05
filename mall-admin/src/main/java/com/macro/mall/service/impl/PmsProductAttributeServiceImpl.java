@@ -15,6 +15,7 @@ import com.macro.mall.service.PmsProductAttributeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class PmsProductAttributeServiceImpl extends ServiceImpl<PmsProductAttrib
         return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 
+    @Transactional
     @Override
     public int create(PmsProductAttributeParam pmsProductAttributeParam) {
         PmsProductAttribute pmsProductAttribute = new PmsProductAttribute();
@@ -67,6 +69,7 @@ public class PmsProductAttributeServiceImpl extends ServiceImpl<PmsProductAttrib
         return this.getById(id);
     }
 
+    @Transactional
     @Override
     public int delete(List<Long> ids) {
         //获取分类

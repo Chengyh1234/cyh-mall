@@ -3,9 +3,6 @@ spring:
     name: mall-portal
   profiles:
     active: dev #默认为开发环境
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
 
 mybatis-plus:
   mapper-locations:
@@ -20,21 +17,38 @@ jwt:
 
 secure:
   ignored:
-    urls: #安全路径白名单
+    urls: #安全路径白名单（仅放行必须匿名的端点）
+      # Swagger 文档资源
       - /swagger-ui/
+      - /swagger-ui/**
       - /v3/api-docs/*
-      - /*/*.html
-      - /*/*.js
-      - /*/*.css
-      - /*/*.png
+      - /webjars/**
       - /favicon.ico
+      # 监控端点
       - /actuator/**
       - /druid/**
-      - /sso/**
+      # 会员认证匿名接口（/sso/info 需登录，不在此放行）
+      - /sso/register
+      - /sso/login
+      - /sso/verifyQrCode
+      - /sso/loginBySmsCode
+      - /sso/forgetPassword
+      - /sso/updatePassword
+      - /sso/refreshToken
+      # 图形验证码
+      - /captcha/**
+      # 门户浏览数据
       - /home/**
       - /product/**
       - /brand/**
-      - /alipay/**
+      # 支付宝异步回调（支付宝服务器调用，无 token；pay/webPay/query 需登录）
+      - /alipay/notify
+      # 商品评论浏览（发表/回复/点赞需登录）
+      - /comment/list
+      - /comment/detail/**
+      # 阿里云OSS上传成功回调（OSS服务器调用，无 token；policy 需登录）
+      - /aliyun/oss/callback
+      - /aliyun/oss/policy  #先开启
 
 springdoc:
   swagger-ui:
@@ -57,11 +71,13 @@ springdoc:
 redis:
   database: mall
   key:
-    authCode: 'ums:authCode'
+    smsCode: 'ums:smsCode'
+    captcha: 'ums:captcha'
     orderId: 'oms:orderId'
     member: 'ums:member'
   expire:
-    authCode: 90 # 验证码超期时间
+    smsCode: 300 # 短信验证码超期时间（秒）
+    captcha: 60 # 图形验证码超期时间（秒）
     common: 86400 # 24小时
 
 mongo:
@@ -74,3 +90,16 @@ rabbitmq:
     name:
       cancelOrder: cancelOrderQueue
 
+# ==================== 阿里云OSS对象存储配置 ====================
+aliyun:
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com # oss对外服务的访问域名
+    accessKeyId: YOUR_OSS_ACCESS_KEY_ID # 访问身份验证中用到用户标识
+    accessKeySecret: YOUR_OSS_ACCESS_KEY_SECRET # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
+    bucketName: mall-oss-cyh # oss的存储空间
+    policy:
+      expire: 300 # 签名有效期(S)
+    maxSize: 10 # 上传文件大小(M)
+    callback: http://localhost:8085/aliyun/oss/callback # 文件上传成功后的回调地址
+    dir:
+      prefix: mall/images/ # 上传文件夹路径前缀

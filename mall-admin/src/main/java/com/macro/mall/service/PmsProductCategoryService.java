@@ -18,13 +18,11 @@ public interface PmsProductCategoryService extends IService<PmsProductCategory> 
     /**
      * 创建商品分类
      */
-    @Transactional
     int create(PmsProductCategoryParam pmsProductCategoryParam);
 
     /**
      * 修改商品分类
      */
-    @Transactional
     int update(Long id, PmsProductCategoryParam pmsProductCategoryParam);
 
     /**

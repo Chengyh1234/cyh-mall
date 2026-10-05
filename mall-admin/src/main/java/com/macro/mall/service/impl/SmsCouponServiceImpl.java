@@ -16,6 +16,7 @@ import com.macro.mall.model.*;
 import com.macro.mall.service.SmsCouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class SmsCouponServiceImpl extends ServiceImpl<SmsCouponMapper, SmsCoupon
     private SmsCouponProductCategoryRelationDao productCategoryRelationDao;
     @Autowired
     private SmsCouponDao couponDao;
+    @Transactional
     @Override
     public int create(SmsCouponParam couponParam) {
         couponParam.setCount(couponParam.getPublishCount());
@@ -59,6 +61,7 @@ public class SmsCouponServiceImpl extends ServiceImpl<SmsCouponMapper, SmsCoupon
         return count;
     }
 
+    @Transactional
     @Override
     public int delete(Long id) {
         //删除优惠券
@@ -80,6 +83,7 @@ public class SmsCouponServiceImpl extends ServiceImpl<SmsCouponMapper, SmsCoupon
                 .eq(SmsCouponProductRelation::getCouponId, id));
     }
 
+    @Transactional
     @Override
     public int update(Long id, SmsCouponParam couponParam) {
         couponParam.setId(id);

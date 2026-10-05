@@ -9,7 +9,6 @@
         <result column="name" property="name" />
         <result column="phone_number" property="phoneNumber" />
         <result column="default_status" property="defaultStatus" />
-        <result column="post_code" property="postCode" />
         <result column="province" property="province" />
         <result column="city" property="city" />
         <result column="region" property="region" />

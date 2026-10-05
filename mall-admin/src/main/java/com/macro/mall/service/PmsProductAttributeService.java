@@ -25,7 +25,6 @@ public interface PmsProductAttributeService extends IService<PmsProductAttribute
     /**
      * 添加商品属性
      */
-    @Transactional
     int create(PmsProductAttributeParam pmsProductAttributeParam);
 
     /**
@@ -41,7 +40,6 @@ public interface PmsProductAttributeService extends IService<PmsProductAttribute
     /**
      * 批量删除商品属性
      */
-    @Transactional
     int delete(List<Long> ids);
 
     /**

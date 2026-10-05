@@ -14,6 +14,7 @@ import com.macro.mall.service.UmsAdminCacheService;
 import com.macro.mall.service.UmsRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -82,6 +83,7 @@ public class UmsRoleServiceImpl extends ServiceImpl<UmsRoleMapper, UmsRole> impl
         return roleDao.getResourceListByRoleId(roleId);
     }
 
+    @Transactional
     @Override
     public int allocMenu(Long roleId, List<Long> menuIds) {
         //先删除原有关系
@@ -96,6 +98,7 @@ public class UmsRoleServiceImpl extends ServiceImpl<UmsRoleMapper, UmsRole> impl
         return menuIds.size();
     }
 
+    @Transactional
     @Override
     public int allocResource(Long roleId, List<Long> resourceIds) {
         //先删除原有关系

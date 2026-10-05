@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 会员浏览记录管理Service实现类
@@ -39,11 +40,6 @@ public class MemberReadHistoryServiceImpl implements MemberReadHistoryService {
             return 0;
         }
         UmsMember member = memberService.getCurrentMember();
-        memberReadHistory.setMemberId(member.getId());
-        memberReadHistory.setMemberNickname(member.getNickname());
-        memberReadHistory.setMemberIcon(member.getIcon());
-        memberReadHistory.setId(null);
-        memberReadHistory.setCreateTime(new Date());
         if (sqlEnable) {
             PmsProduct product = productMapper.selectById(memberReadHistory.getProductId());
             if (product == null || product.getDeleteStatus() == 1) {
@@ -54,6 +50,28 @@ public class MemberReadHistoryServiceImpl implements MemberReadHistoryService {
             memberReadHistory.setProductPrice(product.getPrice() + "");
             memberReadHistory.setProductPic(product.getPic());
         }
+        // 同一会员重复浏览同一商品时不新建记录，直接更新原记录的创建时间
+        Optional<MemberReadHistory> existingHistory = memberReadHistoryRepository
+                .findByMemberIdAndProductId(member.getId(), memberReadHistory.getProductId());
+        if (existingHistory.isPresent()) {
+            MemberReadHistory history = existingHistory.get();
+            history.setMemberNickname(member.getNickname());
+            history.setMemberIcon(member.getIcon());
+            history.setCreateTime(new Date());
+            if (sqlEnable) {
+                history.setProductName(memberReadHistory.getProductName());
+                history.setProductSubTitle(memberReadHistory.getProductSubTitle());
+                history.setProductPrice(memberReadHistory.getProductPrice());
+                history.setProductPic(memberReadHistory.getProductPic());
+            }
+            memberReadHistoryRepository.save(history);
+            return 1;
+        }
+        memberReadHistory.setMemberId(member.getId());
+        memberReadHistory.setMemberNickname(member.getNickname());
+        memberReadHistory.setMemberIcon(member.getIcon());
+        memberReadHistory.setId(null);
+        memberReadHistory.setCreateTime(new Date());
         memberReadHistoryRepository.save(memberReadHistory);
         return 1;
     }

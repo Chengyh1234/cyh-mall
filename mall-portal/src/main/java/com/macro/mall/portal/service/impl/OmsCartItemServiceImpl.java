@@ -14,6 +14,7 @@ import com.macro.mall.portal.service.OmsPromotionService;
 import com.macro.mall.portal.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class OmsCartItemServiceImpl extends ServiceImpl<OmsCartItemMapper, OmsCa
     @Autowired
     private UmsMemberService memberService;
 
+    @Transactional
     @Override
     public int add(OmsCartItem cartItem) {
         int count;
@@ -115,6 +117,7 @@ public class OmsCartItemServiceImpl extends ServiceImpl<OmsCartItemMapper, OmsCa
         return productDao.getCartProduct(productId);
     }
 
+    @Transactional
     @Override
     public int updateAttr(OmsCartItem cartItem) {
         //删除原购物车信息

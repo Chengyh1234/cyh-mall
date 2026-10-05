@@ -30,6 +30,9 @@ public class PmsComment implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @TableField("member_id")
+    private Long memberId;
+
     @TableField("product_id")
     private Long productId;
 

@@ -4,11 +4,14 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.common.exception.Asserts;
+import com.macro.mall.common.service.RedisService;
 import com.macro.mall.mapper.UmsMemberLevelMapper;
 import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.model.UmsMemberLevel;
 import com.macro.mall.portal.domain.MemberDetails;
+import com.macro.mall.portal.mq.event.SmsSendEvent;
+import com.macro.mall.portal.mq.publisher.SmsEventPublisher;
 import com.macro.mall.portal.service.UmsMemberCacheService;
 import com.macro.mall.portal.service.UmsMemberService;
 import com.macro.mall.security.util.JwtTokenUtil;
@@ -26,11 +29,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 /**
  * 会员管理Service实现类
@@ -47,10 +50,18 @@ public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember
     private UmsMemberLevelMapper memberLevelMapper;
     @Autowired
     private UmsMemberCacheService memberCacheService;
-    @Value("${redis.key.authCode}")
-    private String REDIS_KEY_PREFIX_AUTH_CODE;
-    @Value("${redis.expire.authCode}")
-    private Long AUTH_CODE_EXPIRE_SECONDS;
+    @Value("${redis.database}")
+    private String REDIS_DATABASE;
+    @Value("${redis.key.captcha}")
+    private String REDIS_KEY_CAPTCHA;
+    @Value("${redis.key.smsCode}")
+    private String REDIS_KEY_PREFIX_SMS_CODE;
+    @Value("${redis.expire.smsCode}")
+    private Long SMS_CODE_EXPIRE_SECONDS;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private SmsEventPublisher smsEventPublisher;
 
     @Override
     public UmsMember getByPhone(String phone) {
@@ -71,12 +82,16 @@ public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember
         return baseMapper.selectById(id);
     }
 
+    @Transactional
     @Override
-    public void register(String phone, String password, String authCode) {
-        //验证验证码
-        if(!verifyAuthCode(authCode,phone)){
-            Asserts.fail("验证码错误");
+    public void register(String phone, String password, String smsCode) {
+        //验证短信验证码（一次性使用）
+        String redisKey = REDIS_DATABASE + ":" + REDIS_KEY_PREFIX_SMS_CODE + ":" + phone;
+        String storedCode = (String) redisService.get(redisKey);
+        if (StrUtil.isEmpty(storedCode) || !storedCode.equals(smsCode)) {
+            Asserts.fail("短信验证码错误或已过期");
         }
+        redisService.del(redisKey);
         //查询是否已有该用户
         List<UmsMember> umsMembers = this.list(new LambdaQueryWrapper<UmsMember>()
                 .eq(UmsMember::getPhone, phone));
@@ -100,28 +115,32 @@ public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember
         umsMember.setPassword(null);
     }
 
+    @Transactional
     @Override
-    public String generateAuthCode(String telephone) {
-        // 此处使用模拟生成验证码逻辑，真实环境应接入短信服务，可使用SMS4J来实现
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for(int i=0;i<6;i++){
-            sb.append(random.nextInt(10));
-        }
-        memberCacheService.setAuthCode(telephone,sb.toString());
-        return sb.toString();
-    }
-
-    @Override
-    public void updatePassword(String telephone, String password, String authCode) {
+    public void updatePassword(String telephone, String password, String smsCode) {
         List<UmsMember> memberList = this.list(new LambdaQueryWrapper<UmsMember>()
                 .eq(UmsMember::getPhone, telephone));
         if(CollectionUtils.isEmpty(memberList)){
             Asserts.fail("该账号不存在");
         }
-        //验证验证码
-        if(!verifyAuthCode(authCode,telephone)){
-            Asserts.fail("验证码错误");
+        //验证短信验证码（一次性使用）
+        verifySmsCode(telephone, smsCode);
+        UmsMember umsMember = memberList.get(0);
+        umsMember.setPassword(passwordEncoder.encode(password));
+        baseMapper.updateById(umsMember);
+        memberCacheService.delMember(umsMember.getId());
+    }
+
+    @Transactional
+    @Override
+    public void forgetPassword(String phone, String password, String smsCode) {
+        //验证短信验证码（一次性使用）
+        verifySmsCode(phone, smsCode);
+        //查询账号
+        List<UmsMember> memberList = this.list(new LambdaQueryWrapper<UmsMember>()
+                .eq(UmsMember::getPhone, phone));
+        if (CollectionUtils.isEmpty(memberList)) {
+            Asserts.fail("该账号不存在");
         }
         UmsMember umsMember = memberList.get(0);
         umsMember.setPassword(passwordEncoder.encode(password));
@@ -155,6 +174,11 @@ public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember
         throw new UsernameNotFoundException("用户名或密码错误");
     }
 
+    //    @Override
+//    public String refreshToken(String token) {
+//        return jwtTokenUtil.refreshHeadToken(token);
+//    }
+
     @Override
     public String login(String phone, String password) {
         String token = null;
@@ -174,17 +198,48 @@ public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember
     }
 
     @Override
-    public String refreshToken(String token) {
-        return jwtTokenUtil.refreshHeadToken(token);
-    }
-
-    //对输入的验证码进行校验
-    private boolean verifyAuthCode(String authCode, String telephone){
-        if(StrUtil.isEmpty(authCode)){
-            return false;
+    public void sendLoginSmsCode(String phone, String captchaKey, String captchaText) {
+        // 校验图形验证码（一次性使用，防止短信接口被批量调用）
+        String captchaRedisKey = REDIS_DATABASE + ":" + REDIS_KEY_CAPTCHA + ":" + captchaKey;
+        String storedCaptcha = (String) redisService.get(captchaRedisKey);
+        if (StrUtil.isEmpty(storedCaptcha) || !storedCaptcha.equalsIgnoreCase(captchaText)) {
+            Asserts.fail("图形验证码错误或已过期");
         }
-        String realAuthCode = memberCacheService.getAuthCode(telephone);
-        return authCode.equals(realAuthCode);
+        redisService.del(captchaRedisKey);
+        // 短信请求入队 MQ，由 SmsSendConsumer 异步生成验证码并下发，接口立即返回（异步削峰）
+        // 登录/注册/改密均复用该流程，仅校验图形验证码，不限制手机号注册状态
+        smsEventPublisher.publish(new SmsSendEvent().setPhone(phone));
     }
 
+    @Override
+    public String loginBySmsCode(String phone, String smsCode) {
+        // 校验短信验证码（一次性使用）
+        String redisKey = REDIS_DATABASE + ":" + REDIS_KEY_PREFIX_SMS_CODE + ":" + phone;
+        String storedCode = (String) redisService.get(redisKey);
+        if (StrUtil.isEmpty(storedCode) || !storedCode.equals(smsCode)) {
+            Asserts.fail("短信验证码错误或已过期");
+        }
+        redisService.del(redisKey);
+        // 复用密码登录的 token 签发逻辑
+        String token = null;
+        try {
+            UserDetails userDetails = loadUserByUsername(phone);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            token = jwtTokenUtil.generateToken(userDetails);
+        } catch (AuthenticationException e) {
+            LOGGER.warn("短信验证码登录异常:{}", e.getMessage());
+        }
+        return token;
+    }
+
+    //校验短信验证码（一次性使用，通过后删除）
+    private void verifySmsCode(String phone, String smsCode) {
+        String redisKey = REDIS_DATABASE + ":" + REDIS_KEY_PREFIX_SMS_CODE + ":" + phone;
+        String storedCode = (String) redisService.get(redisKey);
+        if (StrUtil.isEmpty(storedCode) || !storedCode.equals(smsCode)) {
+            Asserts.fail("短信验证码错误或已过期");
+        }
+        redisService.del(redisKey);
+    }
 }

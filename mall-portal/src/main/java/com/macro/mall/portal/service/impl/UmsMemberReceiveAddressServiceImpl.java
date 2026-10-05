@@ -9,6 +9,7 @@ import com.macro.mall.portal.service.UmsMemberReceiveAddressService;
 import com.macro.mall.portal.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class UmsMemberReceiveAddressServiceImpl extends ServiceImpl<UmsMemberRec
                 .eq(UmsMemberReceiveAddress::getId, id));
     }
 
+    @Transactional
     @Override
     public int update(Long id, UmsMemberReceiveAddress address) {
         address.setId(null);

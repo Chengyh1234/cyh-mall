@@ -18,7 +18,6 @@ public interface UmsMemberCouponService extends IService<SmsCouponHistory> {
     /**
      * 会员添加优惠券
      */
-    @Transactional
     void add(Long couponId);
 
     /**

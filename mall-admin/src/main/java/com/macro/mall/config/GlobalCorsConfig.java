@@ -27,6 +27,8 @@ public class GlobalCorsConfig {
         config.addAllowedHeader("*");
         //允许所有请求方法跨域调用
         config.addAllowedMethod("*");
+        //暴露 JWT 自动续期回传的新token响应头，使前端能够跨域读取
+        config.addExposedHeader("newToken");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

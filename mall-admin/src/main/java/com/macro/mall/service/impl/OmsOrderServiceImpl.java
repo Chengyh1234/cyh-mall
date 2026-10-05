@@ -14,6 +14,7 @@ import com.macro.mall.model.OmsOrderOperateHistory;
 import com.macro.mall.service.OmsOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
         return page;
     }
 
+    @Transactional
     @Override
     public int delivery(List<OmsOrderDeliveryParam> deliveryParamList) {
         //批量发货
@@ -73,6 +75,7 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
         return count;
     }
 
+    @Transactional
     @Override
     public int close(List<Long> ids, String note) {
         OmsOrder record = new OmsOrder();
@@ -105,13 +108,13 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
         return orderDao.getDetail(id);
     }
 
+    @Transactional
     @Override
     public int updateReceiverInfo(OmsReceiverInfoParam receiverInfoParam) {
         OmsOrder order = new OmsOrder();
         order.setId(receiverInfoParam.getOrderId());
         order.setReceiverName(receiverInfoParam.getReceiverName());
         order.setReceiverPhone(receiverInfoParam.getReceiverPhone());
-        order.setReceiverPostCode(receiverInfoParam.getReceiverPostCode());
         order.setReceiverDetailAddress(receiverInfoParam.getReceiverDetailAddress());
         order.setReceiverProvince(receiverInfoParam.getReceiverProvince());
         order.setReceiverCity(receiverInfoParam.getReceiverCity());
@@ -129,6 +132,7 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
         return count;
     }
 
+    @Transactional
     @Override
     public int updateMoneyInfo(OmsMoneyInfoParam moneyInfoParam) {
         OmsOrder order = new OmsOrder();
@@ -148,6 +152,7 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
         return count;
     }
 
+    @Transactional
     @Override
     public int updateNote(Long id, String note, Integer status) {
         OmsOrder order = new OmsOrder();

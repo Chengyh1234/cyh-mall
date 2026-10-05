@@ -65,7 +65,6 @@ public interface UmsAdminService extends IService<UmsAdmin> {
     /**
      * 修改用户角色关系
      */
-    @Transactional
     int updateRole(Long adminId, List<Long> roleIds);
 
     /**

@@ -48,12 +48,6 @@ public class UmsMemberReceiveAddress implements Serializable {
     private Integer defaultStatus;
 
     /**
-     * 邮政编码
-     */
-    @TableField("post_code")
-    private String postCode;
-
-    /**
      * 省份/直辖市
      */
     @TableField("province")

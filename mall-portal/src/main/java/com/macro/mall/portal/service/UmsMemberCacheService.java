@@ -21,14 +21,4 @@ public interface UmsMemberCacheService {
      * 设置会员用户缓存
      */
     void setMember(UmsMember member);
-
-    /**
-     * 设置验证码
-     */
-    void setAuthCode(String telephone, String authCode);
-
-    /**
-     * 获取验证码
-     */
-    String getAuthCode(String telephone);
 }

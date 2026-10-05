@@ -17,7 +17,6 @@ public interface SmsFlashPromotionProductRelationService extends IService<SmsFla
     /**
      * 批量添加关联
      */
-    @Transactional
     int create(List<SmsFlashPromotionProductRelation> relationList);
 
     /**

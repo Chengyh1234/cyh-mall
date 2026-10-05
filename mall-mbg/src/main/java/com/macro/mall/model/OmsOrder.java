@@ -203,12 +203,6 @@ public class OmsOrder implements Serializable {
     private String receiverPhone;
 
     /**
-     * 收货人邮编
-     */
-    @TableField("receiver_post_code")
-    private String receiverPostCode;
-
-    /**
      * 省份/直辖市
      */
     @TableField("receiver_province")

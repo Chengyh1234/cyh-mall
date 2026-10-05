@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
+import java.util.TimeZone;
+
 
 /**
  * Jackson相关配置
@@ -27,6 +29,8 @@ public class JacksonConfig {
         // Include.NON_EMPTY 属性为空（""）或者为NULL都不序列化，返回的json是没有这个字段的
         // Include.NON_NULL 属性为NULL的字段不序列化
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        // 设置序列化时区为东八区，避免 Date 类型返回时间与本地相差8小时
+        objectMapper.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
         return objectMapper;
     }
 }

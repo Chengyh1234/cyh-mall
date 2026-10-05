@@ -25,25 +25,21 @@ public interface OmsPortalOrderService extends IService<OmsOrder> {
     /**
      * 根据提交信息生成订单
      */
-    @Transactional
     Map<String, Object> generateOrder(OrderParam orderParam);
 
     /**
      * 支付成功后的回调
      */
-    @Transactional
     Integer paySuccess(Long orderId, Integer payType);
 
     /**
      * 自动取消超时订单
      */
-    @Transactional
     Integer cancelTimeOutOrder();
 
     /**
      * 取消单个超时订单
      */
-    @Transactional
     void cancelOrder(Long orderId);
 
     /**
@@ -74,7 +70,6 @@ public interface OmsPortalOrderService extends IService<OmsOrder> {
     /**
      * 根据orderSn来实现的支付成功逻辑
      */
-    @Transactional
     void paySuccessByOrderSn(String orderSn, Integer payType);
 
     /**

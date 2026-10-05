@@ -16,7 +16,6 @@ public interface SmsHomeNewProductService extends IService<SmsHomeNewProduct> {
     /**
      * 添加首页推荐
      */
-    @Transactional
     int create(List<SmsHomeNewProduct> homeNewProductList);
 
     /**

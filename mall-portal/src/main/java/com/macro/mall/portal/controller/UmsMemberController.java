@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,17 +32,17 @@ public class UmsMemberController {
     @Autowired
     private UmsMemberService memberService;
 
-    @Operation(summary = "会员注册")
+    @Operation(summary = "会员注册（短信验证码）")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult register(@RequestParam String phone,
                                  @RequestParam String password,
-                                 @RequestParam String authCode) {
-        memberService.register(phone, password, authCode);
+                                 @RequestParam String smsCode) {
+        memberService.register(phone, password, smsCode);
         return CommonResult.success(null,"注册成功");
     }
 
-    @Operation(summary = "会员登录")
+    @Operation(summary = "手机号密码登录")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult login(@RequestParam String phone,
@@ -61,20 +60,45 @@ public class UmsMemberController {
     @Operation(summary = "获取会员信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
-    public CommonResult info(Principal principal) {
-        if(principal==null){
-            return CommonResult.unauthorized(null);
-        }
+    public CommonResult info() {
         UmsMember member = memberService.getCurrentMember();
         return CommonResult.success(member);
     }
 
-    @Operation(summary = "获取验证码")
-    @RequestMapping(value = "/getAuthCode", method = RequestMethod.GET)
+    @Operation(summary = "校验图形验证码并发送短信验证码")
+    @RequestMapping(value = "/verifyQrCode", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult getAuthCode(@RequestParam String telephone) {
-        String authCode = memberService.generateAuthCode(telephone);
-        return CommonResult.success(authCode,"获取验证码成功");
+    public CommonResult verifyQrCode(@RequestParam String phone,
+                                     @RequestParam String captchaKey,
+                                     @RequestParam String captchaText) {
+        // 图形验证码校验通过后短信请求入队 MQ，异步下发，接口立即返回
+        memberService.sendLoginSmsCode(phone, captchaKey, captchaText);
+        return CommonResult.success(null,"验证码已发送");
+    }
+
+    @Operation(summary = "短信验证码登录")
+    @RequestMapping(value = "/loginBySmsCode", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult loginBySmsCode(@RequestParam String phone,
+                                       @RequestParam String smsCode) {
+        String token = memberService.loginBySmsCode(phone, smsCode);
+        if (token == null) {
+            return CommonResult.validateFailed("短信验证码错误");
+        }
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("token", token);
+        tokenMap.put("tokenHead", tokenHead);
+        return CommonResult.success(tokenMap);
+    }
+
+    @Operation(summary = "忘记密码（重置密码，无需登录）")
+    @RequestMapping(value = "/forgetPassword", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult forgetPassword(@RequestParam String phone,
+                                       @RequestParam String password,
+                                       @RequestParam String smsCode) {
+        memberService.forgetPassword(phone, password, smsCode);
+        return CommonResult.success(null,"密码重置成功");
     }
 
     @Operation(summary = "会员修改密码")
@@ -82,24 +106,24 @@ public class UmsMemberController {
     @ResponseBody
     public CommonResult updatePassword(@RequestParam String telephone,
                                  @RequestParam String password,
-                                 @RequestParam String authCode) {
-        memberService.updatePassword(telephone,password,authCode);
+                                 @RequestParam String smsCode) {
+        memberService.updatePassword(telephone,password,smsCode);
         return CommonResult.success(null,"密码修改成功");
     }
 
 
-    @Operation(summary = "刷新token")
-    @RequestMapping(value = "/refreshToken", method = RequestMethod.GET)
-    @ResponseBody
-    public CommonResult refreshToken(HttpServletRequest request) {
-        String token = request.getHeader(tokenHeader);
-        String refreshToken = memberService.refreshToken(token);
-        if (refreshToken == null) {
-            return CommonResult.failed("token已经过期！");
-        }
-        Map<String, String> tokenMap = new HashMap<>();
-        tokenMap.put("token", refreshToken);
-        tokenMap.put("tokenHead", tokenHead);
-        return CommonResult.success(tokenMap);
-    }
+    //    @Operation(summary = "刷新token")
+//    @RequestMapping(value = "/refreshToken", method = RequestMethod.GET)
+//    @ResponseBody
+//    public CommonResult refreshToken(HttpServletRequest request) {
+//        String token = request.getHeader(tokenHeader);
+//        String refreshToken = memberService.refreshToken(token);
+//        if (refreshToken == null) {
+//            return CommonResult.failed("token已经过期！");
+//        }
+//        Map<String, String> tokenMap = new HashMap<>();
+//        tokenMap.put("token", refreshToken);
+//        tokenMap.put("tokenHead", tokenHead);
+//        return CommonResult.success(tokenMap);
+//    }
 }

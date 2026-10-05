@@ -17,8 +17,6 @@ public class OmsReceiverInfoParam {
     private String receiverName;
     @Schema(title =  "收货人电话")
     private String receiverPhone;
-    @Schema(title =  "收货人邮编")
-    private String receiverPostCode;
     @Schema(title =  "详细地址")
     private String receiverDetailAddress;
     @Schema(title =  "省份/直辖市")

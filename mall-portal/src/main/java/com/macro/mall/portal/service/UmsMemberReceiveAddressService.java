@@ -28,7 +28,6 @@ public interface UmsMemberReceiveAddressService extends IService<UmsMemberReceiv
      * @param id 地址表的id
      * @param address 修改的收货地址信息
      */
-    @Transactional
     int update(Long id, UmsMemberReceiveAddress address);
 
     /**

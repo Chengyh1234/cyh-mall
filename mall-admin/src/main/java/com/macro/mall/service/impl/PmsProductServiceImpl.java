@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
@@ -82,6 +83,7 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
     @Autowired
     private PmsProductVertifyRecordDao productVertifyRecordDao;
 
+    @Transactional
     @Override
     public int create(PmsProductParam productParam) {
         int count;
@@ -134,6 +136,7 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
         return productDao.getUpdateInfo(id);
     }
 
+    @Transactional
     @Override
     public int update(Long id, PmsProductParam productParam) {
         int count;
@@ -233,6 +236,7 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
         return this.page(new Page<>(pageNum, pageSize), wrapper);
     }
 
+    @Transactional
     @Override
     public int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail) {
         PmsProduct product = new PmsProduct();

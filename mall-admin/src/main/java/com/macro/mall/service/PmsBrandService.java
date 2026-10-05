@@ -27,7 +27,6 @@ public interface PmsBrandService extends IService<PmsBrand> {
     /**
      * 修改品牌
      */
-    @Transactional
     int updateBrand(Long id, PmsBrandParam pmsBrandParam);
 
     /**

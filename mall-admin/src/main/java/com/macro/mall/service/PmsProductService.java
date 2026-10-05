@@ -21,7 +21,6 @@ public interface PmsProductService extends IService<PmsProduct> {
     /**
      * 创建商品
      */
-    @Transactional(isolation = Isolation.DEFAULT,propagation = Propagation.REQUIRED)
     int create(PmsProductParam productParam);
 
     /**
@@ -32,7 +31,6 @@ public interface PmsProductService extends IService<PmsProduct> {
     /**
      * 更新商品
      */
-    @Transactional
     int update(Long id, PmsProductParam productParam);
 
     /**
@@ -46,7 +44,6 @@ public interface PmsProductService extends IService<PmsProduct> {
      * @param verifyStatus 审核状态
      * @param detail 审核详情
      */
-    @Transactional
     int updateVerifyStatus(List<Long> ids, Integer verifyStatus, String detail);
 
     /**

@@ -9,6 +9,7 @@ import com.macro.mall.mapper.SmsHomeRecommendSubjectMapper;
 import com.macro.mall.model.SmsHomeRecommendSubject;
 import com.macro.mall.service.SmsHomeRecommendSubjectService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  */
 @Service
 public class SmsHomeRecommendSubjectServiceImpl extends ServiceImpl<SmsHomeRecommendSubjectMapper, SmsHomeRecommendSubject> implements SmsHomeRecommendSubjectService {
+    @Transactional
     @Override
     public int create(List<SmsHomeRecommendSubject> recommendSubjectList) {
         for (SmsHomeRecommendSubject recommendSubject : recommendSubjectList) {

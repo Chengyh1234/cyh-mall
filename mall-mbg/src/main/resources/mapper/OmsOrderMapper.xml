@@ -34,7 +34,6 @@
         <result column="bill_receiver_email" property="billReceiverEmail" />
         <result column="receiver_name" property="receiverName" />
         <result column="receiver_phone" property="receiverPhone" />
-        <result column="receiver_post_code" property="receiverPostCode" />
         <result column="receiver_province" property="receiverProvince" />
         <result column="receiver_city" property="receiverCity" />
         <result column="receiver_region" property="receiverRegion" />

@@ -11,7 +11,7 @@ import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
-import com.macro.mall.portal.component.CancelOrderSender;
+import com.macro.mall.portal.mq.publisher.OrderCancelEventPublisher;
 import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.dao.PortalOrderItemDao;
 import com.macro.mall.portal.dao.SmsCouponHistoryDao;
@@ -20,6 +20,7 @@ import com.macro.mall.portal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -66,7 +67,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
     @Autowired
     private OmsOrderItemMapper orderItemMapper;
     @Autowired
-    private CancelOrderSender cancelOrderSender;
+    private OrderCancelEventPublisher orderCancelEventPublisher;
 
     @Override
     public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
@@ -92,6 +93,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         return result;
     }
 
+    @Transactional
     @Override
     public Map<String, Object> generateOrder(OrderParam orderParam) {
         List<OmsOrderItem> orderItemList = new ArrayList<>();
@@ -198,11 +200,10 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         order.setStatus(0);
         //订单类型：0->正常订单；1->秒杀订单
         order.setOrderType(0);
-        //收货人信息：姓名、电话、邮编、地址
+        //收货人信息：姓名、电话、地址
         UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(orderParam.getMemberReceiveAddressId());
         order.setReceiverName(address.getName());
         order.setReceiverPhone(address.getPhoneNumber());
-        order.setReceiverPostCode(address.getPostCode());
         order.setReceiverProvince(address.getProvince());
         order.setReceiverCity(address.getCity());
         order.setReceiverRegion(address.getRegion());
@@ -251,6 +252,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         return result;
     }
 
+    @Transactional
     @Override
     public Integer paySuccess(Long orderId, Integer payType) {
         //修改订单支付状态
@@ -266,6 +268,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         return count;
     }
 
+    @Transactional
     @Override
     public Integer cancelTimeOutOrder() {
         Integer count=0;
@@ -295,6 +298,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         return timeOutOrders.size();
     }
 
+    @Transactional
     @Override
     public void cancelOrder(Long orderId) {
         //查询未付款的取消订单
@@ -331,8 +335,8 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         //获取订单超时时间
         OmsOrderSetting orderSetting = orderSettingMapper.selectById(1L);
         long delayTimes = orderSetting.getNormalOrderOvertime() * 60 * 1000;
-        //发送延迟消息
-        cancelOrderSender.sendMessage(orderId, delayTimes);
+        //发布延迟消息，TTL 到期后由 OrderCancelConsumer 异步取消订单
+        orderCancelEventPublisher.publishOrderCancel(orderId, delayTimes);
     }
 
     @Override
@@ -417,6 +421,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         }
     }
 
+    @Transactional
     @Override
     public void paySuccessByOrderSn(String orderSn, Integer payType) {
         OmsOrder order = getOrderByOrderSn(orderSn);

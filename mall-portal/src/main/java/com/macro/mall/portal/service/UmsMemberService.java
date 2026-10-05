@@ -6,6 +6,8 @@ import com.macro.mall.model.UmsMember;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 /**
  * 会员管理Service
  * Created by macro on 2018/8/3.
@@ -22,21 +24,19 @@ public interface UmsMemberService extends IService<UmsMember> {
     UmsMember getById(Long id);
 
     /**
-     * 用户注册
+     * 用户注册（短信验证码校验）
      */
-    @Transactional
-    void register(String phone, String password, String authCode);
+    void register(String phone, String password, String smsCode);
 
     /**
-     * 生成验证码
+     * 修改密码（短信验证码校验）
      */
-    String generateAuthCode(String telephone);
+    void updatePassword(String telephone, String password, String smsCode);
 
     /**
-     * 修改密码
+     * 忘记密码（短信验证码校验，无需登录）
      */
-    @Transactional
-    void updatePassword(String telephone, String password, String authCode);
+    void forgetPassword(String phone, String password, String smsCode);
 
     /**
      * 获取当前登录会员
@@ -54,13 +54,22 @@ public interface UmsMemberService extends IService<UmsMember> {
      */
     UserDetails loadUserByUsername(String username);
 
-    /**
-     * 登录后获取token
-     */
+
     String login(String phone, String password);
 
+    void sendLoginSmsCode(String phone, String captchaKey, String captchaText);
+
     /**
-     * 刷新token
+     * 短信验证码登录
+     *
+     * @param phone   手机号
+     * @param smsCode 短信验证码
+     * @return JWT token，登录失败返回 null
      */
-    String refreshToken(String token);
+    String loginBySmsCode(String phone, String smsCode);
+
+    //    /**
+//     * 刷新token
+//     */
+//    String refreshToken(String token);
 }

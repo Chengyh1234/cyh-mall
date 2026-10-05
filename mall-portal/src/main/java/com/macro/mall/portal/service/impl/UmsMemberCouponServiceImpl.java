@@ -13,6 +13,7 @@ import com.macro.mall.portal.service.UmsMemberCouponService;
 import com.macro.mall.portal.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ public class UmsMemberCouponServiceImpl extends ServiceImpl<SmsCouponHistoryMapp
     private SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
     @Autowired
     private PmsProductMapper productMapper;
+    @Transactional
     @Override
     public void add(Long couponId) {
         UmsMember currentMember = memberService.getCurrentMember();

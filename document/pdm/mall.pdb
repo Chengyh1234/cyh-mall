@@ -13958,18 +13958,6 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:DataType>int(1)</a:DataType>
 <a:Length>1</a:Length>
 </o:Column>
-<o:Column Id="o781">
-<a:ObjectID>013038D3-3265-4B47-AA73-C893A6006BD8</a:ObjectID>
-<a:Name>post_code</a:Name>
-<a:Code>post_code</a:Code>
-<a:CreationDate>1522390221</a:CreationDate>
-<a:Creator>zhenghong</a:Creator>
-<a:ModificationDate>1522390293</a:ModificationDate>
-<a:Modifier>zhenghong</a:Modifier>
-<a:Comment>邮政编码</a:Comment>
-<a:DataType>varchar(100)</a:DataType>
-<a:Length>100</a:Length>
-</o:Column>
 <o:Column Id="o782">
 <a:ObjectID>214E7869-4680-4DDC-A4AF-611BDB9DB594</a:ObjectID>
 <a:Name>province</a:Name>
@@ -15185,18 +15173,6 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:DataType>varchar(32)</a:DataType>
 <a:Length>32</a:Length>
 <a:Column.Mandatory>1</a:Column.Mandatory>
-</o:Column>
-<o:Column Id="o872">
-<a:ObjectID>AA0D5272-63FA-45D9-8816-9D547B177F10</a:ObjectID>
-<a:Name>receiver_post_code</a:Name>
-<a:Code>receiver_post_code</a:Code>
-<a:CreationDate>1522660418</a:CreationDate>
-<a:Creator>zhenghong</a:Creator>
-<a:ModificationDate>1522660472</a:ModificationDate>
-<a:Modifier>zhenghong</a:Modifier>
-<a:Comment>收货人邮编</a:Comment>
-<a:DataType>varchar(32)</a:DataType>
-<a:Length>32</a:Length>
 </o:Column>
 <o:Column Id="o873">
 <a:ObjectID>7E47519A-F397-40EF-A70D-4B26E116BD67</a:ObjectID>
