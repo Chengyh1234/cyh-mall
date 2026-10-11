@@ -63,6 +63,17 @@ public class RabbitMqConfig {
     /** 统一死信交换机（订单超时复用 + 各业务 DLQ） */
     public static final String DEAD_EXCHANGE = "mall.dead.direct";
 
+    // ==================== 库存异步扣减（下单/支付/取消） ====================
+
+    /** 库存操作交换机 */
+    public static final String STOCK_EXCHANGE = "mall.stock.direct";
+    /** 库存操作队列 */
+    public static final String STOCK_OPERATE_QUEUE = "mall.stock.operate.queue";
+    /** 库存操作路由键 */
+    public static final String STOCK_OPERATE_ROUTING_KEY = "mall.stock.operate";
+    /** 库存操作死信队列（消费失败后人工补偿） */
+    public static final String STOCK_OPERATE_DLQ = "mall.stock.operate.dlq";
+
     // ==================== 订单超时取消 - 交换机 & 队列 ====================
 
     @Bean
@@ -138,6 +149,40 @@ public class RabbitMqConfig {
     @Bean
     public Binding smsSendDlqBinding(Queue smsSendDlq) {
         return BindingBuilder.bind(smsSendDlq).to(deadExchange()).with(SMS_SEND_ROUTING_KEY);
+    }
+
+    // ==================== 库存异步扣减 - 交换机 & 队列 ====================
+
+    @Bean
+    public DirectExchange stockExchange() {
+        return ExchangeBuilder.directExchange(STOCK_EXCHANGE).durable(true).build();
+    }
+
+    /**
+     * 库存操作队列：消费者 {@code @RabbitListener(queues = RabbitMqConfig.STOCK_OPERATE_QUEUE)}
+     * 消费失败重试耗尽后转入死信队列人工补偿
+     */
+    @Bean
+    public Queue stockOperateQueue() {
+        return QueueBuilder.durable(STOCK_OPERATE_QUEUE)
+                .deadLetterExchange(DEAD_EXCHANGE)
+                .deadLetterRoutingKey(STOCK_OPERATE_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Binding stockOperateBinding(DirectExchange stockExchange, Queue stockOperateQueue) {
+        return BindingBuilder.bind(stockOperateQueue).to(stockExchange).with(STOCK_OPERATE_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue stockOperateDlq() {
+        return QueueBuilder.durable(STOCK_OPERATE_DLQ).build();
+    }
+
+    @Bean
+    public Binding stockOperateDlqBinding(Queue stockOperateDlq) {
+        return BindingBuilder.bind(stockOperateDlq).to(deadExchange()).with(STOCK_OPERATE_ROUTING_KEY);
     }
 
     // ==================== 死信交换机 ====================

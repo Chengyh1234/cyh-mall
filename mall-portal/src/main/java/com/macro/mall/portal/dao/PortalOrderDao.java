@@ -22,10 +22,16 @@ public interface PortalOrderDao {
     int updateSkuStock(@Param("itemList") List<OmsOrderItem> orderItemList);
 
     /**
-     * 获取超时订单
+     * 下单预扣落库：增加 pms_sku_stock 表的锁定库存（lock_stock）
+     */
+    int updateSkuStockLock(@Param("itemList") List<OmsOrderItem> orderItemList);
+
+    /**
+     * 获取指定订单类型的超时未支付订单
+     * @param orderType 订单类型（0->普通订单；1->秒杀订单）
      * @param minute 超时时间（分）
      */
-    List<OmsOrderDetail> getTimeOutOrders(@Param("minute") Integer minute);
+    List<OmsOrderDetail> getTimeOutOrders(@Param("orderType") Integer orderType, @Param("minute") Integer minute);
 
     /**
      * 批量修改订单状态

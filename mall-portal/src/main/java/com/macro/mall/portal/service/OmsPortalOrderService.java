@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.spring.service.IService;
 
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.model.OmsOrder;
+import com.macro.mall.portal.domain.BuyNowConfirmParam;
+import com.macro.mall.portal.domain.BuyNowParam;
 import com.macro.mall.portal.domain.ConfirmOrderResult;
+import com.macro.mall.portal.domain.FlashPromotionOrderParam;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.domain.OrderParam;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,19 +26,29 @@ public interface OmsPortalOrderService extends IService<OmsOrder> {
     ConfirmOrderResult generateConfirmOrder(List<Long> cartIds);
 
     /**
+     * 根据立即购买信息生成确认单信息
+     */
+    ConfirmOrderResult generateBuyNowConfirmOrder(BuyNowConfirmParam buyNowConfirmParam);
+
+    /**
      * 根据提交信息生成订单
      */
     Map<String, Object> generateOrder(OrderParam orderParam);
 
     /**
+     * 根据立即购买信息生成订单
+     */
+    Map<String, Object> generateBuyNowOrder(BuyNowParam buyNowParam);
+
+    /**
+     * 根据限时购/秒杀信息生成订单（限时购才限购，限购数为场次商品配置的固定值）
+     */
+    Map<String, Object> generateFlashOrder(FlashPromotionOrderParam flashPromotionOrderParam);
+
+    /**
      * 支付成功后的回调
      */
     Integer paySuccess(Long orderId, Integer payType);
-
-    /**
-     * 自动取消超时订单
-     */
-    Integer cancelTimeOutOrder();
 
     /**
      * 取消单个超时订单

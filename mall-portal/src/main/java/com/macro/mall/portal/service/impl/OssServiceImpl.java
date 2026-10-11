@@ -33,8 +33,10 @@ public class OssServiceImpl implements OssService {
     private int ALIYUN_OSS_EXPIRE;
     @Value("${aliyun.oss.maxSize}")
     private int ALIYUN_OSS_MAX_SIZE;
-    @Value("${aliyun.oss.callback}")
+    @Value("${aliyun.oss.callback.url}")
     private String ALIYUN_OSS_CALLBACK;
+    @Value("${aliyun.oss.callback.enabled:false}")
+    private boolean ALIYUN_OSS_CALLBACK_ENABLED;
     @Value("${aliyun.oss.bucketName}")
     private String ALIYUN_OSS_BUCKET_NAME;
     @Value("${aliyun.oss.endpoint}")
@@ -59,9 +61,9 @@ public class OssServiceImpl implements OssService {
         Date expiration = new Date(expireEndTime);
         // 文件大小
         long maxSize = ALIYUN_OSS_MAX_SIZE * 1024 * 1024;
-        // 回调
+        // 回调（本地调试暂时关闭：不填回调地址，OSS 直传后不再回调本地服务）
         OssCallbackParam callback = new OssCallbackParam();
-        callback.setCallbackUrl(ALIYUN_OSS_CALLBACK);
+        callback.setCallbackUrl("");
         callback.setCallbackBody("filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}");
         callback.setCallbackBodyType("application/x-www-form-urlencoded");
         // 提交节点
@@ -74,13 +76,15 @@ public class OssServiceImpl implements OssService {
             byte[] binaryData = postPolicy.getBytes("utf-8");
             String policy = BinaryUtil.toBase64String(binaryData);
             String signature = ossClient.calculatePostSignature(postPolicy);
-            String callbackData = BinaryUtil.toBase64String(JSONUtil.parse(callback).toString().getBytes("utf-8"));
             // 返回结果
             result.setAccessKeyId(ossClient.getCredentialsProvider().getCredentials().getAccessKeyId());
             result.setPolicy(policy);
             result.setSignature(signature);
             result.setDir(dir);
-            result.setCallback(callbackData);
+            // 回调开关：关闭时不下发 callback，OSS 直传后不回调本地服务
+            if (ALIYUN_OSS_CALLBACK_ENABLED && StrUtil.isNotEmpty(ALIYUN_OSS_CALLBACK)) {
+                result.setCallback(BinaryUtil.toBase64String(JSONUtil.parse(callback).toString().getBytes("utf-8")));
+            }
             result.setHost(action);
         } catch (Exception e) {
             LOGGER.error("签名生成失败", e);

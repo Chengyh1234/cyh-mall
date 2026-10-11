@@ -44,6 +44,7 @@
             LEFT JOIN oms_order_item ot ON o.id = ot.order_id
         WHERE
             o.status = 0
+            AND o.order_type = #{orderType}
             AND o.create_time &lt; date_add(NOW(), INTERVAL -#{minute} MINUTE);
     </select>
 
@@ -58,6 +59,20 @@
             lock_stock = CASE id
             <foreach collection="itemList" item="item">
               WHEN #{item.productSkuId} THEN lock_stock - #{item.productQuantity}
+            </foreach>
+            END
+        WHERE
+            id IN
+        <foreach collection="itemList" item="item" separator="," open="(" close=")">
+            #{item.productSkuId}
+        </foreach>
+    </update>
+    <update id="updateSkuStockLock">
+        UPDATE pms_sku_stock
+        SET
+            lock_stock = CASE id
+            <foreach collection="itemList" item="item">
+              WHEN #{item.productSkuId} THEN lock_stock + #{item.productQuantity}
             </foreach>
             END
         WHERE

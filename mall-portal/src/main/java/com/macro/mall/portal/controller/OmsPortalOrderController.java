@@ -2,7 +2,10 @@ package com.macro.mall.portal.controller;
 
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
+import com.macro.mall.portal.domain.BuyNowConfirmParam;
+import com.macro.mall.portal.domain.BuyNowParam;
 import com.macro.mall.portal.domain.ConfirmOrderResult;
+import com.macro.mall.portal.domain.FlashPromotionOrderParam;
 import com.macro.mall.portal.domain.OmsOrderDetail;
 import com.macro.mall.portal.domain.OrderParam;
 import com.macro.mall.portal.service.OmsPortalOrderService;
@@ -37,6 +40,14 @@ public class OmsPortalOrderController {
         return CommonResult.success(confirmOrderResult);
     }
 
+    @Operation(summary = "根据立即购买信息生成确认单")
+    @RequestMapping(value = "/generateBuyNowConfirmOrder", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult<ConfirmOrderResult> generateBuyNowConfirmOrder(@RequestBody BuyNowConfirmParam buyNowConfirmParam) {
+        ConfirmOrderResult confirmOrderResult = portalOrderService.generateBuyNowConfirmOrder(buyNowConfirmParam);
+        return CommonResult.success(confirmOrderResult);
+    }
+
     @Operation(summary = "根据购物车信息生成订单")
     @RequestMapping(value = "/generateOrder", method = RequestMethod.POST)
     @ResponseBody
@@ -45,28 +56,28 @@ public class OmsPortalOrderController {
         return CommonResult.success(result, "下单成功");
     }
 
+    @Operation(summary = "根据立即购买信息生成订单")
+    @RequestMapping(value = "/generateBuyNowOrder", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult generateBuyNowOrder(@RequestBody BuyNowParam buyNowParam) {
+        Map<String, Object> result = portalOrderService.generateBuyNowOrder(buyNowParam);
+        return CommonResult.success(result, "下单成功");
+    }
+
+    @Operation(summary = "根据限时购/秒杀信息生成订单（限时购才限购）")
+    @RequestMapping(value = "/generateFlashOrder", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult generateFlashOrder(@RequestBody FlashPromotionOrderParam flashPromotionOrderParam) {
+        Map<String, Object> result = portalOrderService.generateFlashOrder(flashPromotionOrderParam);
+        return CommonResult.success(result, "秒杀下单成功");
+    }
+
     @Operation(summary = "用户支付成功的回调")
     @RequestMapping(value = "/paySuccess", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult paySuccess(@RequestParam Long orderId,@RequestParam Integer payType) {
         Integer count = portalOrderService.paySuccess(orderId,payType);
         return CommonResult.success(count, "支付成功");
-    }
-
-    @Operation(summary = "自动取消超时订单")
-    @RequestMapping(value = "/cancelTimeOutOrder", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult cancelTimeOutOrder() {
-        portalOrderService.cancelTimeOutOrder();
-        return CommonResult.success(null);
-    }
-
-    @Operation(summary = "取消单个超时订单")
-    @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
-    @ResponseBody
-    public CommonResult cancelOrder(Long orderId) {
-        portalOrderService.sendDelayMessageCancelOrder(orderId);
-        return CommonResult.success(null);
     }
 
     @Operation(summary = "按状态分页获取用户订单列表")

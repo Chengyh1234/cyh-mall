@@ -1,7 +1,6 @@
 package com.macro.mall.common.service.impl;
 
 import com.macro.mall.common.service.RedisService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
@@ -14,8 +13,11 @@ import java.util.concurrent.TimeUnit;
  * Created by macro on 2020/3/3.
  */
 public class RedisServiceImpl implements RedisService {
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public RedisServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public void set(String key, Object value, long time) {

@@ -75,10 +75,33 @@ redis:
     captcha: 'ums:captcha'
     orderId: 'oms:orderId'
     member: 'ums:member'
+    # 商品SKU可用库存（预扣库存）缓存
+    skuStock: 'pms:skuStock'
+    # 商品SKU限购累计购买数缓存
+    skuLimit: 'pms:skuLimit'
+    # 防止重复下单的幂等锁key
+    orderDedup: 'oms:dedup'
+    # 防止短时间内重复添加购物车的防抖key
+    cartDedup: 'oms:cartDedup'
+    # 购物车列表缓存key
+    cart: 'oms:cart'
   expire:
     smsCode: 300 # 短信验证码超期时间（秒）
     captcha: 60 # 图形验证码超期时间（秒）
     common: 86400 # 24小时
+    skuStock: 86400 # SKU库存预扣缓存有效期（秒）
+    skuLimit: 86400 # SKU限购累计有效期（秒）
+    cart: 604800 # 购物车缓存有效期（秒），7天；到期后自动回源MySQL并回填
+
+# ==================== 商品购买安全策略 ====================
+# Redis 库存预扣 + Lua 防超卖 + RabbitMQ 异步扣库存 + 限购校验 + 订单/加购防抖
+purchase:
+  # 下单防重窗口（秒）：同一用户同一SKU在此窗口内只能成功提交一次订单
+  order-dedup-seconds: 5
+  # 加购防抖窗口（秒）：同一用户同一SKU在此窗口内的重复加购请求被拦截
+  cart-dedup-seconds: 3
+  # 限购：单个用户对单个SKU的最大购买数量（0 表示不限购）
+  limit-per-user: 2
 
 mongo:
   insert:
@@ -100,6 +123,8 @@ aliyun:
     policy:
       expire: 300 # 签名有效期(S)
     maxSize: 10 # 上传文件大小(M)
-    callback: http://localhost:8085/aliyun/oss/callback # 文件上传成功后的回调地址
+    callback:
+      url: http://localhost:8085/aliyun/oss/callback # 文件上传成功后的回调地址
+      enabled: false # 是否开启上传回调，本地调试设 false（OSS 无法回调本地），线上设为 true
     dir:
       prefix: mall/images/ # 上传文件夹路径前缀

@@ -283,46 +283,6 @@
 				"description": ""
 			},
 			"response": []
-		},
-		{
-			"name": "取消超时订单",
-			"request": {
-				"url": "{{portal.mall}}/order/cancelTimeOutOrder",
-				"method": "POST",
-				"header": [],
-				"body": {},
-				"description": ""
-			},
-			"response": []
-		},
-		{
-			"name": "取消单个超时订单",
-			"request": {
-				"url": {
-					"raw": "{{portal.mall}}/order/cancelOrder?orderId=13",
-					"host": [
-						"{{portal.mall}}"
-					],
-					"path": [
-						"order",
-						"cancelOrder"
-					],
-					"query": [
-						{
-							"key": "orderId",
-							"value": "13",
-							"equals": true,
-							"description": ""
-						}
-					],
-					"variable": []
-				},
-				"method": "POST",
-				"header": [],
-				"body": {},
-				"description": ""
-			},
-			"response": []
 		}
-	]
+		]
 }

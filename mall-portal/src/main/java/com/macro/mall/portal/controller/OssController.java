@@ -1,5 +1,6 @@
 package com.macro.mall.portal.controller;
 
+import com.aliyun.oss.OSS;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.portal.domain.OssCallbackResult;
 import com.macro.mall.portal.domain.OssPolicyResult;
@@ -34,6 +35,17 @@ public class OssController {
         return CommonResult.success(result);
     }
 
+   // ① 前端 GET /aliyun/oss/policy  → 拿到 policy + signature + callback(签名参数)
+   //（callback 是 base64 编码的"回调约定"，内含回调地址、要带的字段）
+   //
+   //         ② 前端把文件 multipart 直传 OSS（POST host）
+   //         │
+   //         ▼
+   //         ③ OSS 校验签名 → 文件成功落库（object 生成）
+   //         │
+   //         ▼
+   //         ④ OSS 按 callback 里约定的地址，POST 回服务端 /aliyun/oss/callback  ← 触发点
+   //  回调接口信息会返回给前端
     @Operation(summary = "Oss上传成功回调")
     @RequestMapping(value = "/callback", method = RequestMethod.POST)
     @ResponseBody
