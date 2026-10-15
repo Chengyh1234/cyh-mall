@@ -40,6 +40,7 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(registry -> {
             //不需要保护的资源路径允许访问
+            System.out.println("###SEC_IGNORED_URLS=" + ignoreUrlsConfig.getUrls() + "###");
             for (String url : ignoreUrlsConfig.getUrls()) {
                 registry.requestMatchers(url).permitAll();
             }

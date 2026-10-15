@@ -14,4 +14,19 @@
         <result column="sort" property="sort" />
     </resultMap>
 
+    <!-- 原子扣减秒杀专属库存：flash_promotion_count >= quantity 才允许扣减，避免扣成负数 -->
+    <update id="deductFlashCount">
+        update sms_flash_promotion_product_relation
+        set flash_promotion_count = flash_promotion_count - #{quantity}
+        where id = #{id}
+          and flash_promotion_count >= #{quantity}
+    </update>
+
+    <!-- 回补秒杀专属库存（订单取消/超时关闭时） -->
+    <update id="increaseFlashCount">
+        update sms_flash_promotion_product_relation
+        set flash_promotion_count = flash_promotion_count + #{quantity}
+        where id = #{id}
+    </update>
+
 </mapper>

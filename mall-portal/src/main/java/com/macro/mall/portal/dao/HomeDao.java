@@ -25,6 +25,11 @@ public interface HomeDao {
     List<FlashPromotionProduct> getFlashProductList(@Param("flashPromotionId") Long flashPromotionId, @Param("sessionId") Long sessionId);
 
     /**
+     * 获取某场次全部秒杀商品
+     */
+    List<FlashPromotionProduct> getFlashProductListAll(@Param("flashPromotionId") Long flashPromotionId, @Param("sessionId") Long sessionId);
+
+    /**
      * 获取新品推荐
      */
     List<PmsProduct> getNewProductList(@Param("offset") Integer offset,@Param("limit") Integer limit);

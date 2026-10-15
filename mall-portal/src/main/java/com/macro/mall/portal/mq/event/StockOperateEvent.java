@@ -21,6 +21,9 @@ public class StockOperateEvent implements Serializable {
     /** 库存操作类型：1->锁定(下单预扣落库)；2->扣减(支付成功)；3->释放(取消/超时) */
     private Integer operateType;
 
+    /** 是否秒杀订单。true 时消费者更新 sms_flash_promotion_product_relation.flash_promotion_count，否则更新 pms_sku_stock */
+    private Boolean flashOrder;
+
     /** 订单ID（用于日志排查） */
     private Long orderId;
 
@@ -38,5 +41,8 @@ public class StockOperateEvent implements Serializable {
 
         /** 操作数量 */
         private Integer quantity;
+
+        /** 秒杀关系ID（秒杀订单更新 flash_promotion_count 时使用，普通订单为 null） */
+        private Long flashPromotionRelationId;
     }
 }

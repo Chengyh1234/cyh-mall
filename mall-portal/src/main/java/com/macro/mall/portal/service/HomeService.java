@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
+import com.macro.mall.portal.domain.FlashPromotionItem;
 import com.macro.mall.portal.domain.HomeContentResult;
 
 import java.util.List;
@@ -47,4 +48,9 @@ public interface HomeService extends IService<PmsProduct> {
      * 分页获取新品推荐商品
      */
     List<PmsProduct> newProductList(Integer pageNum, Integer pageSize);
+
+    /**
+     * 获取近期秒杀活动场次列表
+     */
+    List<FlashPromotionItem> flashPromotionList();
 }

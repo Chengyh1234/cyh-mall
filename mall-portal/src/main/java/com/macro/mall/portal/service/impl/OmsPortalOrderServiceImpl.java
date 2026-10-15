@@ -36,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -143,7 +144,9 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         //获取购物车及优惠信息（锁外查询，避免持锁等待DB）
         UmsMember currentMember = memberService.getCurrentMember();
         List<CartPromotionItem> cartPromotionItemList = cartItemService.listPromotion(currentMember.getId(), orderParam.getCartIds());
-        return generateOrderWithLock(orderParam, cartPromotionItemList, currentMember, true);
+        List<Long> skuIds = cartPromotionItemList.stream().map(CartPromotionItem::getProductSkuId).collect(Collectors.toList());
+        return executeOrderWithLock(currentMember.getId(), skuIds, 0,
+                () -> generateOrderInternal(orderParam, cartPromotionItemList, currentMember, true, 0));
     }
 
     @Transactional
@@ -151,42 +154,42 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
     public Map<String, Object> generateBuyNowOrder(BuyNowParam buyNowParam) {
         UmsMember currentMember = memberService.getCurrentMember();
         CartPromotionItem cartPromotionItem = getBuyNowCartPromotionItem(buyNowParam.getProductSkuId(), buyNowParam.getQuantity(), currentMember);
-        return generateOrderWithLock(buyNowParam, Collections.singletonList(cartPromotionItem), currentMember, false);
+        return executeOrderWithLock(currentMember.getId(), Collections.singletonList(cartPromotionItem.getProductSkuId()), 0,
+                () -> generateOrderInternal(buyNowParam, Collections.singletonList(cartPromotionItem), currentMember, false, 0));
     }
 
     @Transactional
     @Override
     public Map<String, Object> generateFlashOrder(FlashPromotionOrderParam flashParam) {
+        //秒杀订单强制不叠加优惠券/积分，避免破坏秒杀价格体系
+        if (flashParam.getCouponId() != null
+                || (flashParam.getUseIntegration() != null && flashParam.getUseIntegration() > 0)) {
+            Asserts.fail("秒杀订单不支持优惠券和积分！");
+        }
         //获取当前用户
         UmsMember currentMember = memberService.getCurrentMember();
-        //校验秒杀活动、场次与商品关系，组装秒杀下单条目
-        CartPromotionItem cartPromotionItem = getFlashBuyNowCartPromotionItem(flashParam, currentMember);
-        //按秒杀固定限购数下单（orderType=1 秒杀订单），不走购物车
-        return generateOrderWithLock(flashParam, Collections.singletonList(cartPromotionItem), currentMember, false,
-                1, cartPromotionItem.getFlashPromotionLimit());
+        //校验秒杀活动、场次与商品关系，组装秒杀下单条目（独立于购物车促销模型）
+        FlashPromotionOrderItem flashItem = buildFlashOrderItem(flashParam);
+        //秒杀独立防重锁 + 秒杀下单（orderType=1，限购数来自场次配置）
+        return executeOrderWithLock(currentMember.getId(), Collections.singletonList(flashItem.getProductSkuId()), 1,
+                () -> generateFlashOrderInternal(flashParam, flashItem, currentMember));
     }
 
     /**
-     * 防重复下单：基于 Redisson 分布式锁 + 防重标记
+     * 防重复下单基础逻辑（普通/秒杀共用）：Redisson 分布式锁 + 防重标记
      * <p>
      * 同一用户对同一批SKU在防重窗口内只允许成功提交一次订单，
      * 防止用户误点、网络卡顿等导致的多次点击产生重复订单。
-     * 由 {@link #generateOrder} / {@link #generateBuyNowOrder} 在事务内调用，
-     * 默认生成普通订单（orderType=0）且不限购（limitPerUser=0）。
+     * 防重key按订单类型区分（普通/秒杀），同SKU的秒杀与普通下单互不拦截。
+     *
+     * @param memberId      当前会员ID
+     * @param skuIds        本次下单的SKU ID列表（用于构建防重key）
+     * @param orderType     订单类型：0->普通订单；1->秒杀订单
+     * @param orderSupplier 事务锁内执行的订单生成逻辑（普通/秒杀各自实现）
      */
-    public Map<String, Object> generateOrderWithLock(OrderParam orderParam, List<CartPromotionItem> cartPromotionItemList, UmsMember currentMember, boolean needDeleteCart) {
-        return generateOrderWithLock(orderParam, cartPromotionItemList, currentMember, needDeleteCart, 0, 0);
-    }
-
-    /**
-     * 防重复下单：基于 Redisson 分布式锁 + 防重标记（支持指定订单类型与限购数）
-     * <p>
-     * 秒杀下单调用此重载，传入 orderType=1 与固定的每人限购数，
-     * 由 Lua 脚本在库存预扣时同步完成限购校验（超买返回 -3）。
-     */
-    public Map<String, Object> generateOrderWithLock(OrderParam orderParam, List<CartPromotionItem> cartPromotionItemList, UmsMember currentMember, boolean needDeleteCart, int orderType, int limitPerUser) {
-        //构建下单防重key前缀：mall:oms:dedup:{memberId}:{skuIds}
-        String dedupPrefix = buildOrderDedupPrefix(currentMember.getId(), cartPromotionItemList);
+    private Map<String, Object> executeOrderWithLock(Long memberId, List<Long> skuIds, int orderType, Supplier<Map<String, Object>> orderSupplier) {
+        //构建下单防重key前缀：mall:oms:dedup:{orderType}:{memberId}:{skuIds}
+        String dedupPrefix = buildOrderDedupPrefix(memberId, skuIds, orderType);
         // 锁key与防重标记key分离，避免与Redisson内部结构冲突
         String lockKey = dedupPrefix + ":lock";
         String dedupFlagKey = dedupPrefix + ":flag";
@@ -199,7 +202,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
                     if (Boolean.TRUE.equals(redisService.hasKey(dedupFlagKey))) {
                         Asserts.fail("操作过于频繁，请勿重复提交！");
                     }
-                    return generateOrderInternal(orderParam, cartPromotionItemList, currentMember, needDeleteCart, orderType, limitPerUser);
+                    return orderSupplier.get();
                 },
                 //防重标记 =保证"5 秒窗口内只能成功一次" → 防连点
                 () -> {
@@ -209,16 +212,123 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
     }
 
     /**
-     * 生成订单的公共逻辑
+     * 秒杀订单生成（独立于普通订单促销逻辑）
+     * <p>
+     * 秒杀不叠加满减/优惠券/积分：金额 = 秒杀价 × 数量；
+     * 库存走秒杀独立池子（Redis 原子预扣 + DB 同步扣减 flash_promotion_count）。
+     *
+     * @param orderParam   秒杀下单参数
+     * @param flashItem    秒杀下单条目
+     * @param currentMember 当前会员
+     */
+    private Map<String, Object> generateFlashOrderInternal(OrderParam orderParam, FlashPromotionOrderItem flashItem, UmsMember currentMember) {
+        //校验收货地址
+        if (orderParam.getMemberReceiveAddressId() == null) {
+            Asserts.fail("请选择收货地址！");
+        }
+        //组装订单条目（秒杀无促销，促销/优惠券/积分金额均为0）
+        OmsOrderItem orderItem = new OmsOrderItem();
+        orderItem.setProductId(flashItem.getProductId());
+        orderItem.setProductName(flashItem.getProductName());
+        orderItem.setProductPic(flashItem.getProductPic());
+        orderItem.setProductAttr(flashItem.getProductAttr());
+        orderItem.setProductBrand(flashItem.getProductBrand());
+        orderItem.setProductSn(flashItem.getProductSn());
+        orderItem.setProductPrice(flashItem.getPrice());
+        orderItem.setProductQuantity(flashItem.getQuantity());
+        orderItem.setProductSkuId(flashItem.getProductSkuId());
+        orderItem.setProductSkuCode(flashItem.getProductSkuCode());
+        orderItem.setProductCategoryId(flashItem.getProductCategoryId());
+        orderItem.setPromotionAmount(new BigDecimal(0));
+        orderItem.setCouponAmount(new BigDecimal(0));
+        orderItem.setIntegrationAmount(new BigDecimal(0));
+        orderItem.setGiftIntegration(0);
+        orderItem.setGiftGrowth(0);
+        orderItem.setPromotionName("限时购");
+        //秒杀订单记录秒杀关系ID，取消时用于回补秒杀专属库存
+        orderItem.setFlashPromotionRelationId(flashItem.getFlashPromotionRelationId());
+        List<OmsOrderItem> orderItemList = Collections.singletonList(orderItem);
+        //Redis秒杀key原子预扣（独立池子，防超卖）+ 秒杀限购校验；DB权威扣减由事务提交后的秒杀MQ异步执行
+        Map<Long, Integer> skuQuantityMap = Collections.singletonMap(flashItem.getProductSkuId(), flashItem.getQuantity());
+        stockCacheService.deductFlashStock(currentMember.getId(), skuQuantityMap, flashItem.getFlashPromotionLimit(),
+                Collections.singletonMap(flashItem.getProductSkuId(), flashItem.getFlashPromotionCount()));
+        //组装订单：金额 = 秒杀价 × 数量，无任何促销减免
+        BigDecimal totalAmount = flashItem.getPrice().multiply(new BigDecimal(flashItem.getQuantity()));
+        OmsOrder order = new OmsOrder();
+        order.setDiscountAmount(new BigDecimal(0));
+        order.setTotalAmount(totalAmount);
+        order.setFreightAmount(new BigDecimal(0));
+        order.setPromotionAmount(new BigDecimal(0));
+        order.setPromotionInfo("限时购");
+        order.setCouponAmount(new BigDecimal(0));
+        order.setIntegration(0);
+        order.setIntegrationAmount(new BigDecimal(0));
+        order.setPayAmount(totalAmount);
+        fillOrderCommonFields(order, orderParam, currentMember, 1);
+        //插入order表和order_item表
+        baseMapper.insert(order);
+        orderItem.setOrderId(order.getId());
+        orderItem.setOrderSn(order.getOrderSn());
+        orderItemDao.insertList(orderItemList);
+        //注册库存事务回调：提交后发MQ锁定数据库库存，回滚时回补秒杀Redis预扣库存
+        registerStockOperateSync(currentMember.getId(), skuQuantityMap, StockOperateEventPublisher.TYPE_LOCK, order.getId(), orderItemList, true);
+        //发送延迟消息取消订单
+        sendDelayMessageCancelOrder(order.getId());
+        Map<String, Object> result = new HashMap<>();
+        result.put("order", order);
+        result.put("orderItemList", orderItemList);
+        return result;
+    }
+
+    /**
+     * 填充订单公共信息（会员、收货地址、订单类型、订单号、自动收货天数等）
+     * 普通订单与秒杀订单共用。
+     */
+    private void fillOrderCommonFields(OmsOrder order, OrderParam orderParam, UmsMember currentMember, int orderType) {
+        order.setMemberId(currentMember.getId());
+        order.setCreateTime(LocalDateTime.now());
+        order.setMemberUsername(currentMember.getPhone());
+        //支付方式：0->未支付；1->支付宝；2->微信
+        order.setPayType(orderParam.getPayType());
+        //订单来源：0->PC订单；1->app订单
+        order.setSourceType(1);
+        //订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单
+        order.setStatus(0);
+        //订单类型：0->正常订单；1->秒杀订单
+        order.setOrderType(orderType);
+        //收货人信息：姓名、电话、地址
+        UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(orderParam.getMemberReceiveAddressId());
+        order.setReceiverName(address.getName());
+        order.setReceiverPhone(address.getPhoneNumber());
+        order.setReceiverProvince(address.getProvince());
+        order.setReceiverCity(address.getCity());
+        order.setReceiverRegion(address.getRegion());
+        order.setReceiverDetailAddress(address.getDetailAddress());
+        //0->未确认；1->已确认
+        order.setConfirmStatus(0);
+        order.setDeleteStatus(0);
+        //生成订单号
+        order.setOrderSn(generateOrderSn(order));
+        //设置自动收货天数
+        List<OmsOrderSetting> orderSettings = orderSettingMapper.selectList(new LambdaQueryWrapper<>());
+        if (CollUtil.isNotEmpty(orderSettings)) {
+            order.setAutoConfirmDay(orderSettings.get(0).getConfirmOvertime());
+        }
+    }
+
+    /**
+     * 生成普通订单（含促销计算：满减/优惠券/积分）
+     * <p>
+     * 仅由 {@link #generateOrder} / {@link #generateBuyNowOrder} 调用；
+     * 秒杀订单走独立的 {@link #generateFlashOrderInternal}，不复用此方法。
      *
      * @param orderParam            下单参数
      * @param cartPromotionItemList 下单商品(含促销信息)
      * @param currentMember         当前会员
      * @param needDeleteCart        是否删除购物车中已下单的商品
-     * @param orderType             订单类型：0->普通订单；1->秒杀订单
-     * @param limitPerUser          购买限购数（0 表示不限购）
+     * @param orderType             订单类型（当前固定为 0，秒杀订单走独立链路）
      */
-    private Map<String, Object> generateOrderInternal(OrderParam orderParam, List<CartPromotionItem> cartPromotionItemList, UmsMember currentMember, boolean needDeleteCart, int orderType, int limitPerUser) {
+    private Map<String, Object> generateOrderInternal(OrderParam orderParam, List<CartPromotionItem> cartPromotionItemList, UmsMember currentMember, boolean needDeleteCart, int orderType) {
         List<OmsOrderItem> orderItemList = new ArrayList<>();
         //校验收货地址
         if(orderParam.getMemberReceiveAddressId()==null){
@@ -285,10 +395,10 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         }
         //计算order_item的实付金额
         handleRealAmount(orderItemList);
-        //Redis库存预扣（Lua原子防超卖）+ 限购校验
+        //Redis库存预扣（Lua原子防超卖，普通订单不限购）
         Map<Long, Integer> skuQuantityMap = cartPromotionItemList.stream()
                 .collect(Collectors.toMap(CartPromotionItem::getProductSkuId, CartPromotionItem::getQuantity, Integer::sum));
-        stockCacheService.deductStock(currentMember.getId(), skuQuantityMap, limitPerUser);
+        stockCacheService.deductStock(skuQuantityMap);
         //根据商品合计、运费、活动优惠、优惠券、积分计算应付金额
         OmsOrder order = new OmsOrder();
         order.setDiscountAmount(new BigDecimal(0));
@@ -311,39 +421,11 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         }
         order.setPayAmount(calcPayAmount(order));
         //转化为订单信息并插入数据库
-        order.setMemberId(currentMember.getId());
-        order.setCreateTime(LocalDateTime.now());
-        order.setMemberUsername(currentMember.getPhone());
-        //支付方式：0->未支付；1->支付宝；2->微信
-        order.setPayType(orderParam.getPayType());
-        //订单来源：0->PC订单；1->app订单
-        order.setSourceType(1);
-        //订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单
-        order.setStatus(0);
-        //订单类型：0->正常订单；1->秒杀订单
-        order.setOrderType(orderType);
-        //收货人信息：姓名、电话、地址
-        UmsMemberReceiveAddress address = memberReceiveAddressService.getItem(orderParam.getMemberReceiveAddressId());
-        order.setReceiverName(address.getName());
-        order.setReceiverPhone(address.getPhoneNumber());
-        order.setReceiverProvince(address.getProvince());
-        order.setReceiverCity(address.getCity());
-        order.setReceiverRegion(address.getRegion());
-        order.setReceiverDetailAddress(address.getDetailAddress());
-        //0->未确认；1->已确认
-        order.setConfirmStatus(0);
-        order.setDeleteStatus(0);
+        fillOrderCommonFields(order, orderParam, currentMember, 0);
         //计算赠送积分
         order.setIntegration(calcGifIntegration(orderItemList));
         //计算赠送成长值
         order.setGrowth(calcGiftGrowth(orderItemList));
-        //生成订单号
-        order.setOrderSn(generateOrderSn(order));
-        //设置自动收货天数
-        List<OmsOrderSetting> orderSettings = orderSettingMapper.selectList(new LambdaQueryWrapper<>());
-        if(CollUtil.isNotEmpty(orderSettings)){
-            order.setAutoConfirmDay(orderSettings.get(0).getConfirmOvertime());
-        }
         // TODO: 2018/9/3 bill_*,delivery_*
         //插入order表和order_item表
         baseMapper.insert(order);
@@ -369,7 +451,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
             deleteCartItemList(cartPromotionItemList, currentMember);
         }
         //注册库存事务回调：提交后发MQ将预扣库存转为数据库锁定库存，回滚时回补Redis预扣库存
-        registerStockOperateSync(currentMember.getId(), skuQuantityMap, StockOperateEventPublisher.TYPE_LOCK, order.getId(), orderItemList);
+        registerStockOperateSync(currentMember.getId(), skuQuantityMap, StockOperateEventPublisher.TYPE_LOCK, order.getId(), orderItemList, false);
         //发送延迟消息取消订单
         sendDelayMessageCancelOrder(order.getId());
         Map<String, Object> result = new HashMap<>();
@@ -388,10 +470,11 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         order.setPaymentTime(LocalDateTime.now());
         order.setPayType(payType);
         baseMapper.updateById(order);
-        //异步扣减真实库存（stock与lock_stock同时扣减，RabbitMQ解耦）
+        //异步扣减真实库存（普通订单 stock 与 lock_stock 同时扣减；秒杀订单库存已在下单时占用，支付走 no-op，RabbitMQ解耦）
         OmsOrderDetail orderDetail = portalOrderDao.getDetail(orderId);
         if (orderDetail != null && CollUtil.isNotEmpty(orderDetail.getOrderItemList())) {
-            registerStockOperateSync(null, null, StockOperateEventPublisher.TYPE_DEDUCT, orderId, orderDetail.getOrderItemList());
+            boolean flashOrder = orderDetail.getOrderType() != null && orderDetail.getOrderType() == 1;
+            registerStockOperateSync(null, null, StockOperateEventPublisher.TYPE_DEDUCT, orderId, orderDetail.getOrderItemList(), flashOrder);
         }
         return 1;
     }
@@ -414,12 +497,18 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
             baseMapper.updateById(cancelOrder);
             List<OmsOrderItem> orderItemList = orderItemMapper.selectList(new LambdaQueryWrapper<OmsOrderItem>()
                     .eq(OmsOrderItem::getOrderId, orderId));
-            //释放Redis预扣库存并异步释放数据库锁定库存
+            //释放Redis预扣库存并异步落库（普通订单释放锁定库存，秒杀订单回补秒杀库存key与flash_promotion_count）
             if (!CollectionUtils.isEmpty(orderItemList)) {
                 Map<Long, Integer> skuQuantityMap = orderItemList.stream()
                         .collect(Collectors.toMap(OmsOrderItem::getProductSkuId, OmsOrderItem::getProductQuantity, Integer::sum));
-                stockCacheService.releaseStock(cancelOrder.getMemberId(), skuQuantityMap);
-                registerStockOperateSync(null, null, StockOperateEventPublisher.TYPE_RELEASE, orderId, orderItemList);
+                boolean flashOrder = cancelOrder.getOrderType() != null && cancelOrder.getOrderType() == 1;
+                if (flashOrder) {
+                    stockCacheService.releaseFlashStock(cancelOrder.getMemberId(), skuQuantityMap);
+                } else {
+                    stockCacheService.releaseStock(skuQuantityMap);
+                }
+                //DB回补统一走MQ异步：秒杀回补flash_promotion_count，普通回补pms_sku_stock
+                registerStockOperateSync(null, null, StockOperateEventPublisher.TYPE_RELEASE, orderId, orderItemList, flashOrder);
             }
             //修改优惠券使用状态
             updateCouponStatus(cancelOrder.getCouponId(), cancelOrder.getMemberId(), 0);
@@ -610,13 +699,13 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
      * 校验秒杀活动/场次并组装秒杀下单条目
      * <p>
      * 秒杀下单走独立的限时购入口，价格取秒杀价，不叠加满减/优惠券/积分，
-     * 限购数为场次商品配置的固定值 {@code flashPromotionLimit}。
+     * 限购数为场次商品配置的固定值 {@code flashPromotionLimit}，
+     * 库存为秒杀独立池子 {@code flash_promotion_count}（与普通库存隔离）。
      *
-     * @param flashParam    秒杀下单参数（含活动ID、场次ID、SKU、数量）
-     * @param currentMember 当前会员
+     * @param flashParam 秒杀下单参数（含活动ID、场次ID、SKU、数量）
      * @return 秒杀下单条目
      */
-    private CartPromotionItem getFlashBuyNowCartPromotionItem(FlashPromotionOrderParam flashParam, UmsMember currentMember) {
+    private FlashPromotionOrderItem buildFlashOrderItem(FlashPromotionOrderParam flashParam) {
         //参数校验
         if (flashParam.getFlashPromotionId() == null || flashParam.getSessionId() == null
                 || flashParam.getProductSkuId() == null || flashParam.getQuantity() == null || flashParam.getQuantity() <= 0) {
@@ -642,7 +731,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
                 && (nowTime.isBefore(session.getStartTime()) || nowTime.isAfter(session.getEndTime()))) {
             Asserts.fail("当前不在限时购场次时间段内！");
         }
-        //查询SKU库存信息
+        //查询SKU信息
         PmsSkuStock skuStock = skuStockMapper.selectById(flashParam.getProductSkuId());
         if (skuStock == null) {
             Asserts.fail("商品SKU不存在！");
@@ -652,7 +741,7 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         if (product == null || !Integer.valueOf(1).equals(product.getPublishStatus())) {
             Asserts.fail("商品已下架！");
         }
-        //查询秒杀商品关系配置，取得秒杀价与固定限购数
+        //查询秒杀商品关系配置，取得秒杀价、固定限购数与秒杀专属库存
         SmsFlashPromotionProductRelation relation = flashPromotionRelationMapper.selectList(
                 new LambdaQueryWrapper<SmsFlashPromotionProductRelation>()
                         .eq(SmsFlashPromotionProductRelation::getFlashPromotionId, flashPromotion.getId())
@@ -662,32 +751,28 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         if (relation == null || relation.getFlashPromotionPrice() == null) {
             Asserts.fail("该商品不在本次限时购活动中！");
         }
+        //秒杀专属库存独立于商品普通库存，未配置或已售罄则不可购买
+        if (relation.getFlashPromotionCount() == null || relation.getFlashPromotionCount() <= 0) {
+            Asserts.fail("该商品秒杀库存未配置或已售罄！");
+        }
         int limitPerUser = relation.getFlashPromotionLimit() == null ? 0 : relation.getFlashPromotionLimit();
-        //组装秒杀下单条目（价格=秒杀价，限购=固定限购数）
-        CartPromotionItem cartPromotionItem = new CartPromotionItem();
-        cartPromotionItem.setProductId(product.getId());
-        cartPromotionItem.setProductSkuId(skuStock.getId());
-        cartPromotionItem.setMemberId(currentMember.getId());
-        cartPromotionItem.setQuantity(flashParam.getQuantity());
-        cartPromotionItem.setPrice(relation.getFlashPromotionPrice());
-        cartPromotionItem.setProductPic(skuStock.getPic() != null ? skuStock.getPic() : product.getPic());
-        cartPromotionItem.setProductName(product.getName());
-        cartPromotionItem.setProductSubTitle(product.getSubTitle());
-        cartPromotionItem.setProductSkuCode(skuStock.getSkuCode());
-        cartPromotionItem.setProductCategoryId(product.getProductCategoryId());
-        cartPromotionItem.setProductBrand(product.getBrandName());
-        cartPromotionItem.setProductSn(product.getProductSn());
-        cartPromotionItem.setProductAttr(skuStock.getSpData());
-        //可用库存（库存-锁定库存）用于本地库存校验
-        int lockStock = skuStock.getLockStock() == null ? 0 : skuStock.getLockStock();
-        cartPromotionItem.setRealStock(Math.max(skuStock.getStock() - lockStock, 0));
-        //秒杀不叠加促销，限购数为固定值
-        cartPromotionItem.setFlashPromotionLimit(limitPerUser);
-        cartPromotionItem.setPromotionMessage("限时购");
-        cartPromotionItem.setReduceAmount(new BigDecimal(0));
-        cartPromotionItem.setIntegration(0);
-        cartPromotionItem.setGrowth(0);
-        return cartPromotionItem;
+        //组装秒杀下单条目（价格=秒杀价，限购=固定限购数，限量=秒杀专属可售库存）
+        FlashPromotionOrderItem flashItem = new FlashPromotionOrderItem();
+        flashItem.setProductId(product.getId());
+        flashItem.setProductSkuId(skuStock.getId());
+        flashItem.setQuantity(flashParam.getQuantity());
+        flashItem.setPrice(relation.getFlashPromotionPrice());
+        flashItem.setProductPic(skuStock.getPic() != null ? skuStock.getPic() : product.getPic());
+        flashItem.setProductName(product.getName());
+        flashItem.setProductSkuCode(skuStock.getSkuCode());
+        flashItem.setProductCategoryId(product.getProductCategoryId());
+        flashItem.setProductBrand(product.getBrandName());
+        flashItem.setProductSn(product.getProductSn());
+        flashItem.setProductAttr(skuStock.getSpData());
+        flashItem.setFlashPromotionLimit(limitPerUser);
+        flashItem.setFlashPromotionCount(relation.getFlashPromotionCount());
+        flashItem.setFlashPromotionRelationId(relation.getId());
+        return flashItem;
     }
 
     /**
@@ -962,23 +1047,26 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
      * 构建下单防重key前缀：{db}:{orderDedup}:{memberId}:{skuIds}
      * 锁key与防重标记key均基于此前缀
      */
-    private String buildOrderDedupPrefix(Long memberId, List<CartPromotionItem> cartPromotionItemList) {
-        String skuIds = cartPromotionItemList.stream()
-                .map(CartPromotionItem::getProductSkuId)
+    private String buildOrderDedupPrefix(Long memberId, List<Long> skuIds, int orderType) {
+        String skuIdsStr = skuIds.stream()
                 .sorted()
                 .map(String::valueOf)
                 .collect(Collectors.joining("-"));
-        return REDIS_DATABASE + ":" + REDIS_KEY_ORDER_DEDUP + ":" + memberId + ":" + skuIds;
+        return REDIS_DATABASE + ":" + REDIS_KEY_ORDER_DEDUP + ":" + orderType + ":" + memberId + ":" + skuIdsStr;
     }
 
     /**
-     * 构建库存异步操作事件
+     * 构建库存异步操作事件（普通订单 flashPromotionRelationId 为 null）
      */
-    private StockOperateEvent buildStockOperateEvent(Integer operateType, Long orderId, List<OmsOrderItem> orderItemList) {
+    private StockOperateEvent buildStockOperateEvent(Integer operateType, Long orderId, List<OmsOrderItem> orderItemList, boolean flashOrder) {
         List<StockOperateEvent.StockItem> itemList = orderItemList.stream()
-                .map(item -> new StockOperateEvent.StockItem().setProductSkuId(item.getProductSkuId()).setQuantity(item.getProductQuantity()))
+                .map(item -> new StockOperateEvent.StockItem()
+                        .setProductSkuId(item.getProductSkuId())
+                        .setQuantity(item.getProductQuantity())
+                        .setFlashPromotionRelationId(item.getFlashPromotionRelationId()))
                 .collect(Collectors.toList());
-        return new StockOperateEvent().setOperateType(operateType).setOrderId(orderId).setItemList(itemList);
+        return new StockOperateEvent().setOperateType(operateType).setOrderId(orderId)
+                .setFlashOrder(flashOrder).setItemList(itemList);
     }
 
     /**
@@ -993,9 +1081,10 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
      * @param operateType    库存操作类型（{@link StockOperateEventPublisher#TYPE_LOCK} 锁定 / TYPE_DEDUCT 扣减 / TYPE_RELEASE 释放）
      * @param orderId        订单ID
      * @param orderItemList  订单条目（用于构建异步落库消息）
+     * @param flashOrder     是否秒杀订单（秒杀回滚时回补独立秒杀库存key）
      */
-    private void registerStockOperateSync(Long memberId, Map<Long, Integer> skuQuantityMap, Integer operateType, Long orderId, List<OmsOrderItem> orderItemList) {
-        Runnable commitAction = () -> stockOperateEventPublisher.publishStockOperate(buildStockOperateEvent(operateType, orderId, orderItemList));
+    private void registerStockOperateSync(Long memberId, Map<Long, Integer> skuQuantityMap, Integer operateType, Long orderId, List<OmsOrderItem> orderItemList, boolean flashOrder) {
+        Runnable commitAction = () -> stockOperateEventPublisher.publishStockOperate(buildStockOperateEvent(operateType, orderId, orderItemList, flashOrder));
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -1007,7 +1096,11 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
                 public void afterCompletion(int status) {
                     //状态非提交（回滚/未知）即回补Redis预扣库存，保证Redis与数据库最终一致；无预扣场景跳过
                     if (status != TransactionSynchronization.STATUS_COMMITTED && !CollectionUtils.isEmpty(skuQuantityMap)) {
-                        stockCacheService.releaseStock(memberId, skuQuantityMap);
+                        if (flashOrder) {
+                            stockCacheService.releaseFlashStock(memberId, skuQuantityMap);
+                        } else {
+                            stockCacheService.releaseStock(skuQuantityMap);
+                        }
                     }
                 }
             });

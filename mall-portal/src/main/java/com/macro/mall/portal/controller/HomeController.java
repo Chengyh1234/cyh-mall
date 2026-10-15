@@ -5,6 +5,7 @@ import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.CmsSubject;
 import com.macro.mall.model.PmsProduct;
 import com.macro.mall.model.PmsProductCategory;
+import com.macro.mall.portal.domain.FlashPromotionItem;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.service.HomeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,5 +78,13 @@ public class HomeController {
                                                          @RequestParam(value = "pageSize", defaultValue = "6") Integer pageSize) {
         List<PmsProduct> productList = homeService.newProductList(pageNum,pageSize);
         return CommonResult.success(productList);
+    }
+
+    @Operation(summary = "获取近期秒杀活动场次列表")
+    @RequestMapping(value = "/flashPromotion/list", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<List<FlashPromotionItem>> flashPromotionList() {
+        List<FlashPromotionItem> flashPromotionList = homeService.flashPromotionList();
+        return CommonResult.success(flashPromotionList);
     }
 }

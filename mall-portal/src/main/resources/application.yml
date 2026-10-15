@@ -41,8 +41,8 @@ secure:
       - /home/**
       - /product/**
       - /brand/**
-      # 支付宝异步回调（支付宝服务器调用，无 token；pay/webPay/query 需登录）
-      - /alipay/notify
+      # 支付宝支付/异步回调（页面跳转与回调需匿名，浏览器无法带 token）
+      - /alipay/**
       # 商品评论浏览（发表/回复/点赞需登录）
       - /comment/list
       - /comment/detail/**

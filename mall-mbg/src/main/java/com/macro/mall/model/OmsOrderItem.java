@@ -128,4 +128,10 @@ public class OmsOrderItem implements Serializable {
      */
     @TableField("product_attr")
     private String productAttr;
+
+    /**
+     * 秒杀商品关系ID（oms_order_item 秒杀订单专用，用于取消时回补秒杀专属库存）
+     */
+    @TableField("flash_promotion_relation_id")
+    private Long flashPromotionRelationId;
 }

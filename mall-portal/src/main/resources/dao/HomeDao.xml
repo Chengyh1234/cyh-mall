@@ -33,6 +33,23 @@
         WHERE
             pr.flash_promotion_id = #{flashPromotionId}
             AND pr.flash_promotion_session_id = #{sessionId}
+        LIMIT 6
+    </select>
+
+    <select id="getFlashProductListAll" resultMap="flashPromotionProduct">
+        SELECT
+            pr.flash_promotion_price,
+            pr.flash_promotion_count,
+            pr.flash_promotion_limit,
+            p.*
+        FROM
+            sms_flash_promotion_product_relation pr
+            LEFT JOIN pms_product p ON pr.product_id = p.id
+        WHERE
+            pr.flash_promotion_id = #{flashPromotionId}
+            AND pr.flash_promotion_session_id = #{sessionId}
+        ORDER BY
+            pr.sort ASC
     </select>
 
     <select id="getNewProductList" resultMap="com.macro.mall.mapper.PmsProductMapper.BaseResultMap">

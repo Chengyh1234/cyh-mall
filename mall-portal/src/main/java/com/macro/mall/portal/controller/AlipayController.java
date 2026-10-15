@@ -34,13 +34,12 @@ public class AlipayController {
     @Autowired
     private AlipayService alipayService;
 
-    @Operation(summary = "支付宝电脑网站支付")
+    @Operation(summary = "支付宝电脑网站扫码支付（当面付）")
     @RequestMapping(value = "/pay", method = RequestMethod.GET)
-    public void pay(AliPayParam aliPayParam, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=" + alipayConfig.getCharset());
-        response.getWriter().write(alipayService.pay(aliPayParam));
-        response.getWriter().flush();
-        response.getWriter().close();
+    @ResponseBody
+    public CommonResult<String> pay(AliPayParam aliPayParam) {
+        //面向“当面付”场景，返回二维码内容字符串，由前端渲染成二维码供买家扫码付款
+        return CommonResult.success(alipayService.pay(aliPayParam));
     }
 
     @Operation(summary = "支付宝手机网站支付")

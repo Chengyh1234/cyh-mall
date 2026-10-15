@@ -24,6 +24,4 @@ public class CartPromotionItem extends OmsCartItem{
     private Integer integration;
     @Schema(title = "购买商品赠送成长值")
     private Integer growth;
-    @Schema(title = "限时购每人限购数量（秒杀下单使用）")
-    private Integer flashPromotionLimit;
 }

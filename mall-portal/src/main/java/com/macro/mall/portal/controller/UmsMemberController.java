@@ -65,6 +65,18 @@ public class UmsMemberController {
         return CommonResult.success(member);
     }
 
+    @Operation(summary = "获取个人积分/成长值资产")
+    @RequestMapping(value = "/points", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult points() {
+        UmsMember member = memberService.getCurrentMember();
+        Map<String, Object> data = new HashMap<>();
+        data.put("integration", member.getIntegration() == null ? 0 : member.getIntegration());
+        data.put("growth", member.getGrowth() == null ? 0 : member.getGrowth());
+        data.put("historyIntegration", member.getHistoryIntegration() == null ? 0 : member.getHistoryIntegration());
+        return CommonResult.success(data);
+    }
+
     @Operation(summary = "校验图形验证码并发送短信验证码")
     @RequestMapping(value = "/verifyQrCode", method = RequestMethod.POST)
     @ResponseBody

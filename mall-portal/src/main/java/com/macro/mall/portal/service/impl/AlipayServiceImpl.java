@@ -5,9 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.mapper.OmsOrderMapper;
@@ -42,14 +43,11 @@ public class AlipayServiceImpl implements AlipayService {
     private OmsPortalOrderService portalOrderService;
     @Override
     public String pay(AliPayParam aliPayParam) {
-        AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
+        //电脑网站采用「当面付款」：alipay.trade.precreate 预下单，返回二维码内容，买家手机扫码支付
+        AlipayTradePrecreateRequest request = new AlipayTradePrecreateRequest();
         if(StrUtil.isNotEmpty(alipayConfig.getNotifyUrl())){
-            //异步接收地址，公网可访问
+            //异步接收地址，公网可访问，当面付依赖异步通知确认支付结果
             request.setNotifyUrl(alipayConfig.getNotifyUrl());
-        }
-        if(StrUtil.isNotEmpty(alipayConfig.getReturnUrl())){
-            //同步跳转地址
-            request.setReturnUrl(alipayConfig.getReturnUrl());
         }
         //******必传参数******
         JSONObject bizContent = new JSONObject();
@@ -65,16 +63,23 @@ public class AlipayServiceImpl implements AlipayService {
         bizContent.put("total_amount", totalAmount);
         //订单标题，不可使用特殊符号
         bizContent.put("subject", aliPayParam.getSubject());
-        //电脑网站支付场景固定传值FAST_INSTANT_TRADE_PAY
-        bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+        //当面付场景固定传值FACE_TO_FACE_PAYMENT
+        bizContent.put("product_code", "FACE_TO_FACE_PAYMENT");
         request.setBizContent(bizContent.toString());
-        String formHtml = null;
+        String qrCode = null;
         try {
-            formHtml = alipayClient.pageExecute(request).getBody();
+            AlipayTradePrecreateResponse response = alipayClient.execute(request);
+            if(response.isSuccess()){
+                //二维码内容，前端用二维码生成器渲染后供买家扫码付款
+                qrCode = response.getQrCode();
+            }else{
+                Asserts.fail("支付宝下单失败：" + response.getMsg() + " " + response.getSubMsg());
+            }
         } catch (AlipayApiException e) {
-            e.printStackTrace();
+            log.error("支付宝当面付下单异常！",e);
+            Asserts.fail("支付宝下单异常：" + e.getErrMsg());
         }
-        return formHtml;
+        return qrCode;
     }
 
     @Override

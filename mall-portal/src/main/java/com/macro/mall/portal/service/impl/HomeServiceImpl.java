@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
 import com.macro.mall.portal.dao.HomeDao;
+import com.macro.mall.portal.domain.FlashPromotionItem;
 import com.macro.mall.portal.domain.FlashPromotionProduct;
 import com.macro.mall.portal.domain.HomeContentResult;
 import com.macro.mall.portal.domain.HomeFlashPromotion;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,15 +46,15 @@ public class HomeServiceImpl extends ServiceImpl<PmsProductMapper, PmsProduct> i
         HomeContentResult result = new HomeContentResult();
         //获取首页广告
         result.setAdvertiseList(getHomeAdvertiseList());
-        //获取推荐品牌
+        //获取推荐品牌，有限制数量
         result.setBrandList(homeDao.getRecommendBrandList(0,6));
         //获取秒杀信息
         result.setHomeFlashPromotion(getHomeFlashPromotion());
-        //获取新品推荐
+        //获取新品推荐，有限制数量
         result.setNewProductList(homeDao.getNewProductList(0,4));
-        //获取人气推荐
+        //获取人气推荐，有限制数量
         result.setHotProductList(homeDao.getHotProductList(0,4));
-        //获取推荐专题
+        //获取推荐专题，有限制数量
         result.setSubjectList(homeDao.getRecommendSubjectList(0,4));
         return result;
     }
@@ -93,6 +96,56 @@ public class HomeServiceImpl extends ServiceImpl<PmsProductMapper, PmsProduct> i
     public List<PmsProduct> newProductList(Integer pageNum, Integer pageSize) {
         int offset = pageSize * (pageNum - 1);
         return homeDao.getNewProductList(offset, pageSize);
+    }
+
+    @Override
+    public List<FlashPromotionItem> flashPromotionList() {
+        List<FlashPromotionItem> itemList = new ArrayList<>();
+        //获取近期秒杀活动
+        SmsFlashPromotion flashPromotion = getRecentFlashPromotion();
+        if (flashPromotion == null) {
+            return itemList;
+        }
+        //场次表只存每日固定时间，需与日期拼成完整时间，基准日期见 getBaseDate
+        LocalDate baseDate = getBaseDate(flashPromotion);
+        List<SmsFlashPromotionSession> sessionList = promotionSessionMapper.selectList(new LambdaQueryWrapper<SmsFlashPromotionSession>()
+                .eq(SmsFlashPromotionSession::getStatus, 1)
+                .orderByAsc(SmsFlashPromotionSession::getStartTime));
+        for (SmsFlashPromotionSession session : sessionList) {
+            FlashPromotionItem item = new FlashPromotionItem();
+            item.setId(session.getId());
+            item.setName(session.getName());
+            item.setStartTime(LocalDateTime.of(baseDate, session.getStartTime()));
+            item.setEndTime(LocalDateTime.of(baseDate, session.getEndTime()));
+            item.setProductList(homeDao.getFlashProductListAll(flashPromotion.getId(), session.getId()));
+            itemList.add(item);
+        }
+        return itemList;
+    }
+
+    //获取近期秒杀活动：已上线且未结束的活动，取开始日期最近的一个
+    private SmsFlashPromotion getRecentFlashPromotion() {
+        LocalDate currDate = LocalDate.now();
+        List<SmsFlashPromotion> flashPromotionList = flashPromotionMapper.selectList(new LambdaQueryWrapper<SmsFlashPromotion>()
+                .eq(SmsFlashPromotion::getStatus, 1)
+                .ge(SmsFlashPromotion::getEndDate, currDate)
+                .orderByAsc(SmsFlashPromotion::getStartDate));
+        if (!CollectionUtils.isEmpty(flashPromotionList)) {
+            return flashPromotionList.get(0);
+        }
+        return null;
+    }
+
+    //计算场次完整时间的基准日期：活动进行中用今天；活动未开始则用活动开始日期
+    private LocalDate getBaseDate(SmsFlashPromotion flashPromotion) {
+        LocalDate currDate = LocalDate.now();
+        if (flashPromotion.getStartDate() != null
+                && flashPromotion.getEndDate() != null
+                && !currDate.isBefore(flashPromotion.getStartDate())
+                && !currDate.isAfter(flashPromotion.getEndDate())) {
+            return currDate;
+        }
+        return flashPromotion.getStartDate() != null ? flashPromotion.getStartDate() : currDate;
     }
 
     private HomeFlashPromotion getHomeFlashPromotion() {
