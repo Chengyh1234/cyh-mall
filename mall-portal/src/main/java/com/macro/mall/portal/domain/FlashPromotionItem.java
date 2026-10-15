@@ -13,6 +13,8 @@ import java.util.List;
 @Getter
 @Setter
 public class FlashPromotionItem {
+    @Schema(title = "秒杀活动ID")
+    private Long flashPromotionId;
     @Schema(title = "场次ID")
     private Long id;
     @Schema(title = "场次名称")

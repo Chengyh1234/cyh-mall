@@ -41,6 +41,13 @@ public class AlipayServiceImpl implements AlipayService {
     private OmsOrderMapper orderMapper;
     @Autowired
     private OmsPortalOrderService portalOrderService;
+    /**
+     * 当面付下单：调用支付宝预下单接口（alipay.trade.precreate），
+     * 生成支付二维码内容，买家扫码完成支付
+     *
+     * @param aliPayParam 支付参数（商户订单号、订单标题等）
+     * @return 支付二维码内容，下单失败时抛出异常
+     */
     @Override
     public String pay(AliPayParam aliPayParam) {
         //电脑网站采用「当面付款」：alipay.trade.precreate 预下单，返回二维码内容，买家手机扫码支付
@@ -53,8 +60,9 @@ public class AlipayServiceImpl implements AlipayService {
         JSONObject bizContent = new JSONObject();
         //商户订单号，商家自定义，保持唯一性
         bizContent.put("out_trade_no", aliPayParam.getOutTradeNo());
-        //订单总金额以数据库中订单表中为准
+        //订单总金额以数据库中订单表中为准，防止前端篡改支付金额
         OmsOrder order = portalOrderService.getOrderByOrderSn(aliPayParam.getOutTradeNo());
+        //防御性校验：订单不存在或金额为空时直接终止下单，避免以非法金额发起支付
         if(order==null||order.getPayAmount()==null){
             Asserts.fail("订单信息或金额不能为空！");
         }
@@ -68,6 +76,7 @@ public class AlipayServiceImpl implements AlipayService {
         request.setBizContent(bizContent.toString());
         String qrCode = null;
         try {
+            //调用支付宝SDK发起预下单请求，成功则返回二维码内容
             AlipayTradePrecreateResponse response = alipayClient.execute(request);
             if(response.isSuccess()){
                 //二维码内容，前端用二维码生成器渲染后供买家扫码付款
@@ -82,18 +91,27 @@ public class AlipayServiceImpl implements AlipayService {
         return qrCode;
     }
 
+    /**
+     * 处理支付宝异步通知：验签通过且交易状态为支付成功时，
+     * 将订单更新为已支付状态
+     *
+     * @param params 支付宝异步通知参数
+     * @return "success"表示处理成功，通知支付宝停止重试；否则返回"failure"
+     */
     @Override
     public String notify(Map<String, String> params) {
+        //异步通知处理：买家付款成功后，支付宝会回调此接口推送支付结果，验签通过后才视为可信通知
         String result = "failure";
         boolean signVerified = false;
         try {
-            //调用SDK验证签名
+            //调用SDK验证签名，防止伪造回调
             signVerified = AlipaySignature.rsaCheckV1(params, alipayConfig.getAlipayPublicKey(), alipayConfig.getCharset(), alipayConfig.getSignType());
         } catch (AlipayApiException e) {
             log.error("支付回调签名校验异常！",e);
             e.printStackTrace();
         }
         if (signVerified) {
+            //验签通过后再校验交易状态，双重确认后才将订单置为已支付
             String tradeStatus = params.get("trade_status");
             if("TRADE_SUCCESS".equals(tradeStatus)){
                 result = "success";
@@ -106,11 +124,21 @@ public class AlipayServiceImpl implements AlipayService {
         } else {
             log.warn("支付回调签名校验失败！");
         }
+        //返回"success"告知支付宝停止重试通知，否则支付宝会按策略多次重试回调
         return result;
     }
 
+    /**
+     * 查询订单支付状态：主动向支付宝发起交易查询，
+     * 用于前端轮询支付结果、订单超时对账等场景
+     *
+     * @param outTradeNo 商户订单号
+     * @param tradeNo    支付宝交易号（两者至少传一个）
+     * @return 交易状态（如TRADE_SUCCESS、WAIT_BUYER_PAY等），查询异常时返回null
+     */
     @Override
     public String query(String outTradeNo, String tradeNo) {
+        //主动查询订单支付状态：用于前端轮询支付结果、订单超时对账等场景
         AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
         //******必传参数******
         JSONObject bizContent = new JSONObject();
@@ -127,8 +155,10 @@ public class AlipayServiceImpl implements AlipayService {
         request.setBizContent(bizContent.toString());
         AlipayTradeQueryResponse response = null;
         try {
+            //调用支付宝SDK发起交易查询请求
             response = alipayClient.execute(request);
         } catch (AlipayApiException e) {
+            //查询异常时response保持为null，下方直接返回null，由调用方兜底处理
             log.error("查询支付宝账单异常！",e);
         }
         if(response.isSuccess()){
@@ -143,8 +173,16 @@ public class AlipayServiceImpl implements AlipayService {
         return response.getTradeStatus();
     }
 
+    /**
+     * 手机网站支付（WAP）：构建支付请求并生成自动提交的form表单HTML，
+     * 页面加载后自动跳转到支付宝收银台完成支付
+     *
+     * @param aliPayParam 支付参数（商户订单号、订单标题等）
+     * @return 自动提交的表单HTML，用于前端页面渲染
+     */
     @Override
     public String webPay(AliPayParam aliPayParam) {
+        //手机网站支付（WAP）：返回自动提交的form表单HTML，页面加载后自动跳转到支付宝收银台完成支付
         AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest ();
         if(StrUtil.isNotEmpty(alipayConfig.getNotifyUrl())){
             //异步接收地址，公网可访问
@@ -158,8 +196,9 @@ public class AlipayServiceImpl implements AlipayService {
         JSONObject bizContent = new JSONObject();
         //商户订单号，商家自定义，保持唯一性
         bizContent.put("out_trade_no", aliPayParam.getOutTradeNo());
-        //订单总金额以数据库中订单表中为准
+        //订单总金额以数据库中订单表中为准，防止前端篡改支付金额
         OmsOrder order = portalOrderService.getOrderByOrderSn(aliPayParam.getOutTradeNo());
+        //防御性校验：订单不存在或金额为空时直接终止下单，避免以非法金额发起支付
         if(order==null||order.getPayAmount()==null){
             Asserts.fail("订单信息或金额不能为空！");
         }
@@ -173,6 +212,7 @@ public class AlipayServiceImpl implements AlipayService {
         request.setBizContent(bizContent.toString());
         String formHtml = null;
         try {
+            //pageExecute生成含自动提交脚本的表单页面，浏览器加载后即跳转至支付宝收银台
             formHtml = alipayClient.pageExecute(request).getBody();
         } catch (AlipayApiException e) {
             e.printStackTrace();

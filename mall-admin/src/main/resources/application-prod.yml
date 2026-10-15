@@ -19,6 +19,12 @@ spring:
       port: 6379 # Redis服务器连接端口
       password: # Redis服务器连接密码（默认为空）
       timeout: 300ms # 连接超时时间（毫秒）
+  rabbitmq:
+    host: rabbit # RabbitMQ服务器地址
+    port: 5672
+    virtual-host: /mall
+    username: mall
+    password: mall
 
 minio:
   endpoint: http://192.168.3.101:9090 #MinIO服务所在地址

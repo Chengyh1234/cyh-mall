@@ -105,4 +105,12 @@ public class EsProductController {
         EsProductRelatedInfo productRelatedInfo = esProductService.searchRelatedInfo(keyword);
         return CommonResult.success(productRelatedInfo);
     }
+
+    @Operation(summary = "搜索建议：根据输入前缀返回联想商品名")
+    @RequestMapping(value = "/suggest", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<List<String>> searchSuggest(@RequestParam String keyword) {
+        List<String> suggestionList = esProductService.searchSuggest(keyword);
+        return CommonResult.success(suggestionList);
+    }
 }

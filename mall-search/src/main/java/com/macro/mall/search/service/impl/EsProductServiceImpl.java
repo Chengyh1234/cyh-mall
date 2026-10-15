@@ -7,6 +7,11 @@ import co.elastic.clients.elasticsearch._types.aggregations.*;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.CompletionSuggestOption;
+import co.elastic.clients.elasticsearch.core.search.FieldSuggester;
+import co.elastic.clients.elasticsearch.core.search.Suggestion;
 import co.elastic.clients.util.ObjectBuilder;
 import com.macro.mall.search.dao.EsProductDao;
 import com.macro.mall.search.domain.EsProduct;
@@ -20,6 +25,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.*;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.suggest.Completion;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -35,6 +41,8 @@ import java.util.stream.Collectors;
 @Service
 public class EsProductServiceImpl implements EsProductService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EsProductServiceImpl.class);
+    /** 搜索建议 suggest 名称（与查询 DSL 对应） */
+    private static final String SUGGEST_NAME = "product-suggest";
     @Autowired
     private EsProductDao productDao;
     @Autowired
@@ -44,6 +52,7 @@ public class EsProductServiceImpl implements EsProductService {
     @Override
     public int importAll() {
         List<EsProduct> esProductList = productDao.getAllEsProductList(null);
+        esProductList.forEach(this::fillSuggest);
         Iterable<EsProduct> esProductIterable = productRepository.saveAll(esProductList);
         Iterator<EsProduct> iterator = esProductIterable.iterator();
         int result = 0;
@@ -65,6 +74,7 @@ public class EsProductServiceImpl implements EsProductService {
         List<EsProduct> esProductList = productDao.getAllEsProductList(id);
         if (esProductList.size() > 0) {
             EsProduct esProduct = esProductList.get(0);
+            fillSuggest(esProduct);
             result = productRepository.save(esProduct);
         }
         return result;
@@ -283,5 +293,60 @@ public class EsProductServiceImpl implements EsProductService {
         }
         productRelatedInfo.setProductAttrs(attrList);
         return productRelatedInfo;
+    }
+
+    @Override
+    public List<String> searchSuggest(String keyword) {
+        if (StrUtil.isEmpty(keyword)) {
+            return ListUtil.empty();
+        }
+        // 使用 completion suggester 查询联想商品名
+        SearchRequest searchRequest = SearchRequest.of(request -> request
+                .index("pms")
+                .suggest(suggester -> suggester
+                        .text(keyword)
+                        .suggesters(SUGGEST_NAME, FieldSuggester.of(fieldSuggester -> fieldSuggester
+                                .completion(completion -> completion
+                                        .field("suggest")
+                                        .size(10))))));
+        SearchResponse<EsProduct> response = elasticsearchTemplate.execute(client -> client.search(searchRequest, EsProduct.class));
+        List<String> suggestionList = new ArrayList<>();
+        Map<String, List<Suggestion<EsProduct>>> suggestMap = response.suggest();
+        if (suggestMap != null) {
+            List<Suggestion<EsProduct>> suggestions = suggestMap.get(SUGGEST_NAME);
+            if (suggestions != null) {
+                for (Suggestion<EsProduct> suggestion : suggestions) {
+                    if (suggestion.isCompletion()) {
+                        List<CompletionSuggestOption<EsProduct>> options = suggestion.completion().options();
+                        for (CompletionSuggestOption<EsProduct> option : options) {
+                            suggestionList.add(option.text());
+                        }
+                    }
+                }
+            }
+        }
+        // 去重并限制数量
+        return suggestionList.stream().distinct().limit(10).collect(Collectors.toList());
+    }
+
+    /**
+     * 填充搜索建议字段：以商品名称 + 副标题 + 关键词作为联想输入
+     */
+    private void fillSuggest(EsProduct esProduct) {
+        List<String> inputs = new ArrayList<>();
+        if (StrUtil.isNotBlank(esProduct.getName())) {
+            inputs.add(esProduct.getName());
+        }
+        if (StrUtil.isNotBlank(esProduct.getSubTitle())) {
+            inputs.add(esProduct.getSubTitle());
+        }
+        if (StrUtil.isNotBlank(esProduct.getKeywords())) {
+            inputs.add(esProduct.getKeywords());
+        }
+        if (!inputs.isEmpty()) {
+            Completion completion = new Completion(inputs);
+            completion.setWeight(esProduct.getSale() == null ? 0 : esProduct.getSale());
+            esProduct.setSuggest(completion);
+        }
     }
 }

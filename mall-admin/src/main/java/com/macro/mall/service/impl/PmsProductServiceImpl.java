@@ -28,8 +28,11 @@ import com.macro.mall.mapper.PmsProductMapper;
 import com.macro.mall.mapper.PmsSkuStockMapper;
 import com.macro.mall.model.*;
 import com.macro.mall.service.PmsProductService;
+import com.macro.mall.common.mq.event.ProductEsChangeAction;
+import com.macro.mall.common.mq.event.ProductEsChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,6 +85,8 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
     private PmsProductDao productDao;
     @Autowired
     private PmsProductVertifyRecordDao productVertifyRecordDao;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -110,6 +115,8 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
         //关联优选
         relateAndInsertList(prefrenceAreaProductRelationDao, productParam.getPrefrenceAreaProductRelationList(), productId);
         count = 1;
+        // 商品创建 -> 事务提交后通知 ES 写入索引
+        eventPublisher.publishEvent(ProductEsChangeEvent.of(ProductEsChangeAction.CREATED, productId));
         return count;
     }
 
@@ -165,6 +172,8 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
         prefrenceAreaProductRelationMapper.delete(new LambdaQueryWrapper<CmsPrefrenceAreaProductRelation>().eq(CmsPrefrenceAreaProductRelation::getProductId, id));
         relateAndInsertList(prefrenceAreaProductRelationDao, productParam.getPrefrenceAreaProductRelationList(), id);
         count = 1;
+        // 商品信息更新 -> 事务提交后通知 ES 更新索引
+        eventPublisher.publishEvent(ProductEsChangeEvent.of(ProductEsChangeAction.UPDATED, id));
         return count;
     }
 
@@ -261,28 +270,44 @@ public class PmsProductServiceImpl extends ServiceImpl<PmsProductMapper, PmsProd
     public int updatePublishStatus(List<Long> ids, Integer publishStatus) {
         PmsProduct record = new PmsProduct();
         record.setPublishStatus(publishStatus);
-        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        int count = baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        // 上架 -> 写入索引；下架 -> 移除索引
+        eventPublisher.publishEvent(ProductEsChangeEvent.of(
+                Integer.valueOf(1).equals(publishStatus) ? ProductEsChangeAction.CREATED : ProductEsChangeAction.DELETED,
+                ids));
+        return count;
     }
 
     @Override
     public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
         PmsProduct record = new PmsProduct();
         record.setRecommandStatus(recommendStatus);
-        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        int count = baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        // 推荐状态变更 -> 更新索引（影响推荐排序）
+        eventPublisher.publishEvent(ProductEsChangeEvent.of(ProductEsChangeAction.UPDATED, ids));
+        return count;
     }
 
     @Override
     public int updateNewStatus(List<Long> ids, Integer newStatus) {
         PmsProduct record = new PmsProduct();
         record.setNewStatus(newStatus);
-        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        int count = baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        // 新品状态变更 -> 更新索引（影响新品排序）
+        eventPublisher.publishEvent(ProductEsChangeEvent.of(ProductEsChangeAction.UPDATED, ids));
+        return count;
     }
 
     @Override
     public int updateDeleteStatus(List<Long> ids, Integer deleteStatus) {
         PmsProduct record = new PmsProduct();
         record.setDeleteStatus(deleteStatus);
-        return baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        int count = baseMapper.update(record, new LambdaQueryWrapper<PmsProduct>().in(PmsProduct::getId, ids));
+        // 删除 -> 移除索引；恢复 -> 写入索引
+        eventPublisher.publishEvent(ProductEsChangeEvent.of(
+                Integer.valueOf(1).equals(deleteStatus) ? ProductEsChangeAction.DELETED : ProductEsChangeAction.CREATED,
+                ids));
+        return count;
     }
 
     @Override

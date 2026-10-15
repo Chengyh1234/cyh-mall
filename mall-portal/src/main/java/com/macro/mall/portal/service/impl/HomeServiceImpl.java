@@ -114,6 +114,7 @@ public class HomeServiceImpl extends ServiceImpl<PmsProductMapper, PmsProduct> i
         for (SmsFlashPromotionSession session : sessionList) {
             FlashPromotionItem item = new FlashPromotionItem();
             item.setId(session.getId());
+            item.setFlashPromotionId(flashPromotion.getId());
             item.setName(session.getName());
             item.setStartTime(LocalDateTime.of(baseDate, session.getStartTime()));
             item.setEndTime(LocalDateTime.of(baseDate, session.getEndTime()));

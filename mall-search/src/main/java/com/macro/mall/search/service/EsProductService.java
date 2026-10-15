@@ -50,4 +50,9 @@ public interface EsProductService {
      * 搜索关键字相关品牌、分类、属性
      */
     EsProductRelatedInfo searchRelatedInfo(String keyword);
+
+    /**
+     * 搜索建议：根据输入前缀返回联想商品名列表
+     */
+    List<String> searchSuggest(String keyword);
 }

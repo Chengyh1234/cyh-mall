@@ -3,10 +3,12 @@ package com.macro.mall.search.domain;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.CompletionField;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.elasticsearch.core.suggest.Completion;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -48,4 +50,12 @@ public class EsProduct implements Serializable {
     private Integer sort;
     @Field(type = FieldType.Nested, fielddata = true)
     private List<EsProductAttributeValue> attrValueList;
+    /**
+     * 搜索建议（completion）输入：商品名称 + 副标题 + 关键词
+     * <p>
+     * 由 {@code EsProductServiceImpl} 在导入 / 创建商品时填充，
+     * 供搜索框联想（suggest）使用。
+     */
+    @CompletionField(maxInputLength = 100)
+    private Completion suggest;
 }
