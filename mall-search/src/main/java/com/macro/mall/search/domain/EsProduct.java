@@ -1,5 +1,6 @@
 package com.macro.mall.search.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
@@ -20,6 +21,8 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode
+// 忽略 ES 文档中 Spring Data 附加的 _class 类型提示等未知字段，避免底层客户端反序列化报错
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Document(indexName = "pms")
 @Setting(shards = 1,replicas = 0)
 public class EsProduct implements Serializable {
