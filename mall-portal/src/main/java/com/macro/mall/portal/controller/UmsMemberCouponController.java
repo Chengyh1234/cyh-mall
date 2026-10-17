@@ -62,6 +62,14 @@ public class UmsMemberCouponController {
         return CommonResult.success(couponList);
     }
 
+    @Operation(summary = "获取优惠券详情（领券页展示）")
+    @RequestMapping(value = "/detail/{couponId}", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult<SmsCoupon> detail(@PathVariable Long couponId) {
+        SmsCoupon coupon = memberCouponService.detail(couponId);
+        return CommonResult.success(coupon);
+    }
+
     @Operation(summary = "获取登录会员购物车的相关优惠券")
     @Parameter(name = "type", description = "使用可用:0->不可用；1->可用",
             in = ParameterIn.PATH,schema = @Schema(type = "integer",defaultValue = "1",allowableValues = {"0","1"}))

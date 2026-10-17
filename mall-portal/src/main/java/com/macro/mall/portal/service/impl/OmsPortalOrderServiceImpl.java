@@ -98,6 +98,8 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
     private SmsFlashPromotionSessionMapper flashPromotionSessionMapper;
     @Autowired
     private SmsFlashPromotionProductRelationMapper flashPromotionRelationMapper;
+    @Autowired
+    private UmsMemberMessageService memberMessageService;
 
     @Override
     public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
@@ -470,6 +472,11 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         order.setPaymentTime(LocalDateTime.now());
         order.setPayType(payType);
         baseMapper.updateById(order);
+        //发送订单支付成功通知
+        OmsOrder orderInfo = baseMapper.selectById(orderId);
+        if (orderInfo != null) {
+            memberMessageService.sendOrderNotice(orderInfo.getMemberId(), orderId, "订单支付成功", "您的订单已支付成功，商家将尽快发货。");
+        }
         //异步扣减真实库存（普通订单 stock 与 lock_stock 同时扣减；秒杀订单库存已在下单时占用，支付走 no-op，RabbitMQ解耦）
         OmsOrderDetail orderDetail = portalOrderDao.getDetail(orderId);
         if (orderDetail != null && CollUtil.isNotEmpty(orderDetail.getOrderItemList())) {
@@ -546,6 +553,8 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
         order.setConfirmStatus(1);
         order.setReceiveTime(LocalDateTime.now());
         baseMapper.updateById(order);
+        //发送订单完成通知
+        memberMessageService.sendOrderNotice(member.getId(), orderId, "订单已完成", "您已确认收货，感谢您的购买。");
     }
 
     @Override

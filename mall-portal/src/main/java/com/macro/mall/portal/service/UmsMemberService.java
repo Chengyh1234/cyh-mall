@@ -3,6 +3,7 @@ package com.macro.mall.portal.service;
 import com.baomidou.mybatisplus.spring.service.IService;
 
 import com.macro.mall.model.UmsMember;
+import com.macro.mall.portal.domain.UmsMemberUpdateParam;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,11 @@ public interface UmsMemberService extends IService<UmsMember> {
      * 获取当前登录会员
      */
     UmsMember getCurrentMember();
+
+    /**
+     * 修改当前登录会员的个人信息（昵称/头像/性别/生日/签名）
+     */
+    void updateCurrentMemberInfo(UmsMemberUpdateParam param);
 
     /**
      * 根据会员id修改会员积分

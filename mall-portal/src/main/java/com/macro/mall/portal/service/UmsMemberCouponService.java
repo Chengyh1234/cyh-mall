@@ -39,4 +39,11 @@ public interface UmsMemberCouponService extends IService<SmsCouponHistory> {
      * 获取用户优惠券列表
      */
     List<SmsCoupon> list(Integer useStatus);
+
+    /**
+     * 获取优惠券详情（供领券页展示）
+     *
+     * @param couponId 优惠券ID
+     */
+    SmsCoupon detail(Long couponId);
 }

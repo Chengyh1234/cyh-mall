@@ -3254,3 +3254,35 @@ INSERT INTO `ums_role_resource_relation` VALUES (247, 1, 31);
 INSERT INTO `ums_role_resource_relation` VALUES (248, 1, 32);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- ----------------------------
+-- Table structure for ums_message
+-- ----------------------------
+DROP TABLE IF EXISTS `ums_message`;
+CREATE TABLE `ums_message`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `type` int(1) NULL DEFAULT NULL COMMENT '消息类型：1->系统通知；2->订单通知；3->营销通知',
+  `send_type` int(1) NULL DEFAULT 0 COMMENT '发送类型：0->定向；1->广播',
+  `title` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '消息标题',
+  `content` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '消息内容',
+  `biz_id` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '业务ID（如订单ID）',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '消息主体表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for ums_member_message
+-- ----------------------------
+DROP TABLE IF EXISTS `ums_member_message`;
+CREATE TABLE `ums_member_message`  (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `member_id` bigint(20) NULL DEFAULT NULL COMMENT '会员ID',
+  `message_id` bigint(20) NULL DEFAULT NULL COMMENT '消息ID',
+  `read_status` int(1) NULL DEFAULT 0 COMMENT '已读状态：0->未读；1->已读',
+  `deleted` int(1) NULL DEFAULT 0 COMMENT '是否删除：0->未删除；1->已删除',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_member_id`(`member_id`) USING BTREE,
+  INDEX `idx_message_id`(`message_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '会员消息接收表' ROW_FORMAT = DYNAMIC;

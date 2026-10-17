@@ -12,12 +12,14 @@ import com.macro.mall.mapper.OmsOrderOperateHistoryMapper;
 import com.macro.mall.model.OmsOrder;
 import com.macro.mall.model.OmsOrderOperateHistory;
 import com.macro.mall.service.OmsOrderService;
+import com.macro.mall.service.UmsMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,8 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
     private OmsOrderOperateHistoryDao orderOperateHistoryDao;
     @Autowired
     private OmsOrderOperateHistoryMapper orderOperateHistoryMapper;
+    @Autowired
+    private UmsMessageService messageService;
 
     @Override
     public IPage<OmsOrder> list(OmsOrderQueryParam queryParam, Integer pageSize, Integer pageNum) {
@@ -72,6 +76,20 @@ public class OmsOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOrder> i
                     return history;
                 }).collect(Collectors.toList());
         orderOperateHistoryDao.insertList(operateHistoryList);
+        //发送订单发货通知
+        for (OmsOrderDeliveryParam deliveryParam : deliveryParamList) {
+            OmsOrder order = baseMapper.selectById(deliveryParam.getOrderId());
+            if (order != null) {
+                UmsMessageParam messageParam = new UmsMessageParam();
+                messageParam.setType(2);
+                messageParam.setSendType(0);
+                messageParam.setTitle("订单已发货");
+                messageParam.setContent("您的订单已发货，请注意查收。");
+                messageParam.setBizId(String.valueOf(order.getId()));
+                messageParam.setMemberIds(Collections.singletonList(order.getMemberId()));
+                messageService.create(messageParam);
+            }
+        }
         return count;
     }
 

@@ -10,6 +10,7 @@ import com.macro.mall.mapper.UmsMemberMapper;
 import com.macro.mall.model.UmsMember;
 import com.macro.mall.model.UmsMemberLevel;
 import com.macro.mall.portal.domain.MemberDetails;
+import com.macro.mall.portal.domain.UmsMemberUpdateParam;
 import com.macro.mall.portal.mq.event.SmsSendEvent;
 import com.macro.mall.portal.mq.publisher.SmsEventPublisher;
 import com.macro.mall.portal.service.UmsMemberCacheService;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -154,6 +156,51 @@ public class UmsMemberServiceImpl extends ServiceImpl<UmsMemberMapper, UmsMember
         Authentication auth = ctx.getAuthentication();
         MemberDetails memberDetails = (MemberDetails) auth.getPrincipal();
         return memberDetails.getUmsMember();
+    }
+
+    @Transactional
+    @Override
+    public void updateCurrentMemberInfo(UmsMemberUpdateParam param) {
+        if (param == null) {
+            Asserts.fail("修改参数不能为空");
+        }
+        // 昵称：必填且限长
+        if (StrUtil.isBlank(param.getNickname())) {
+            Asserts.fail("昵称不能为空");
+        }
+        if (param.getNickname().length() > 30) {
+            Asserts.fail("昵称长度不能超过30个字符");
+        }
+        // 个性签名：限长
+        if (StrUtil.isNotBlank(param.getSignature()) && param.getSignature().length() > 200) {
+            Asserts.fail("个性签名长度不能超过200个字符");
+        }
+        // 性别：仅允许 0->未知；1->男；2->女
+        if (param.getGender() != null && (param.getGender() < 0 || param.getGender() > 2)) {
+            Asserts.fail("性别参数不合法");
+        }
+        // 生日：不能晚于今天
+        if (param.getBirthday() != null && param.getBirthday().isAfter(LocalDate.now())) {
+            Asserts.fail("生日不能晚于今天");
+        }
+        UmsMember current = getCurrentMember();
+        // 只更新允许编辑的字段，null 字段不覆盖（MyBatis-Plus 非空更新策略）
+        UmsMember update = new UmsMember();
+        update.setId(current.getId());
+        update.setNickname(param.getNickname());
+        update.setIcon(param.getIcon());
+        update.setGender(param.getGender());
+        update.setBirthday(param.getBirthday());
+        update.setPersonalizedSignature(param.getSignature());
+        baseMapper.updateById(update);
+        // 同步当前会话中的会员信息（SecurityContext 持有同一对象引用，直接生效）
+        current.setNickname(param.getNickname());
+        current.setIcon(param.getIcon());
+        current.setGender(param.getGender());
+        current.setBirthday(param.getBirthday());
+        current.setPersonalizedSignature(param.getSignature());
+        // 清除缓存，保证后续按手机号查询能拿到最新数据
+        memberCacheService.delMember(current.getId());
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.macro.mall.portal.dao.SmsCouponHistoryDao;
 import com.macro.mall.portal.domain.CartPromotionItem;
 import com.macro.mall.portal.domain.SmsCouponHistoryDetail;
 import com.macro.mall.portal.service.UmsMemberCouponService;
+import com.macro.mall.portal.service.UmsMemberMessageService;
 import com.macro.mall.portal.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,8 @@ public class UmsMemberCouponServiceImpl extends ServiceImpl<SmsCouponHistoryMapp
     private SmsCouponProductCategoryRelationMapper couponProductCategoryRelationMapper;
     @Autowired
     private PmsProductMapper productMapper;
+    @Autowired
+    private UmsMemberMessageService memberMessageService;
     @Transactional
     @Override
     public void add(Long couponId) {
@@ -79,6 +82,18 @@ public class UmsMemberCouponServiceImpl extends ServiceImpl<SmsCouponHistoryMapp
         coupon.setCount(coupon.getCount()-1);
         coupon.setReceiveCount(coupon.getReceiveCount()==null?1:coupon.getReceiveCount()+1);
         couponMapper.updateById(coupon);
+        //发送领券成功营销通知（bizId=券ID，前端可跳转"我的优惠券"）
+        memberMessageService.sendMarketingNotice(currentMember.getId(), couponId,
+                "领券成功", "「" + coupon.getName() + "」已放入您的优惠券，去下单使用吧");
+    }
+
+    @Override
+    public SmsCoupon detail(Long couponId) {
+        SmsCoupon coupon = couponMapper.selectById(couponId);
+        if (coupon == null) {
+            Asserts.fail("优惠券不存在");
+        }
+        return coupon;
     }
 
     /**

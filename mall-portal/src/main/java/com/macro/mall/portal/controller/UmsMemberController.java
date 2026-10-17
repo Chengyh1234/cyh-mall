@@ -2,6 +2,7 @@ package com.macro.mall.portal.controller;
 
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.model.UmsMember;
+import com.macro.mall.portal.domain.UmsMemberUpdateParam;
 import com.macro.mall.portal.service.UmsMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -62,7 +64,16 @@ public class UmsMemberController {
     @ResponseBody
     public CommonResult info() {
         UmsMember member = memberService.getCurrentMember();
+
         return CommonResult.success(member);
+    }
+
+    @Operation(summary = "修改当前登录会员的个人信息")
+    @RequestMapping(value = "/info", method = RequestMethod.PUT)
+    @ResponseBody
+    public CommonResult updateInfo(@RequestBody UmsMemberUpdateParam param) {
+        memberService.updateCurrentMemberInfo(param);
+        return CommonResult.success(null, "修改成功");
     }
 
     @Operation(summary = "获取个人积分/成长值资产")
@@ -70,6 +81,7 @@ public class UmsMemberController {
     @ResponseBody
     public CommonResult points() {
         UmsMember member = memberService.getCurrentMember();
+
         Map<String, Object> data = new HashMap<>();
         data.put("integration", member.getIntegration() == null ? 0 : member.getIntegration());
         data.put("growth", member.getGrowth() == null ? 0 : member.getGrowth());
