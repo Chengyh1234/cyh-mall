@@ -81,6 +81,8 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
     @Autowired
     private OmsOrderItemMapper orderItemMapper;
     @Autowired
+    private OmsOrderReturnApplyMapper returnApplyMapper;
+    @Autowired
     private OrderCancelEventPublisher orderCancelEventPublisher;
     @Autowired
     private DistributedLockService distributedLockService;
@@ -592,6 +594,14 @@ public class OmsPortalOrderServiceImpl extends ServiceImpl<OmsOrderMapper, OmsOr
             List<OmsOrderItem> relatedItemList = orderItemList.stream().filter(item -> item.getOrderId().equals(orderDetail.getId())).collect(Collectors.toList());
             orderDetail.setOrderItemList(relatedItemList);
             orderDetailList.add(orderDetail);
+        }
+        //批量填充售后申请状态：null->无售后；0->待处理；1->退货中；2->已退款；3->已拒绝
+        List<OmsOrderReturnApply> returnApplyList = returnApplyMapper.selectList(new LambdaQueryWrapper<OmsOrderReturnApply>()
+                .in(OmsOrderReturnApply::getOrderId, orderIds));
+        Map<Long, Integer> returnApplyStatusMap = returnApplyList.stream()
+                .collect(Collectors.toMap(OmsOrderReturnApply::getOrderId, OmsOrderReturnApply::getStatus, (oldValue, newValue) -> oldValue));
+        for (OmsOrderDetail orderDetail : orderDetailList) {
+            orderDetail.setReturnApplyStatus(returnApplyStatusMap.get(orderDetail.getId()));
         }
         resultPage.setList(orderDetailList);
         return resultPage;

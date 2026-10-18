@@ -17,4 +17,7 @@ import java.util.List;
 public class OmsOrderDetail extends OmsOrder {
     @Schema(title = "订单商品列表")
     private List<OmsOrderItem> orderItemList;
+
+    @Schema(title = "售后申请状态：null->无售后；0->待处理；1->退货中；2->已退款；3->已拒绝")
+    private Integer returnApplyStatus;
 }

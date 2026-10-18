@@ -21,6 +21,7 @@ import com.macro.mall.model.OmsOrderReturnApply;
 import com.macro.mall.service.OmsOrderReturnApplyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -73,13 +74,17 @@ public class OmsOrderReturnApplyServiceImpl extends ServiceImpl<OmsOrderReturnAp
         Integer status = statusParam.getStatus();
         OmsOrderReturnApply returnApply = new OmsOrderReturnApply();
         if (status.equals(1)) {
-            //确认退货
+            //确认退货：退款金额沿用申请时从订单写入的金额，不允许前端修改
+            OmsOrderReturnApply apply = baseMapper.selectById(id);
+            if (apply == null) {
+                return 0;
+            }
             returnApply.setId(id);
             returnApply.setStatus(1);
-            returnApply.setReturnAmount(statusParam.getReturnAmount());
+            returnApply.setReturnAmount(apply.getReturnAmount());
             returnApply.setCompanyAddressId(statusParam.getCompanyAddressId());
             returnApply.setHandleTime(LocalDateTime.now());
-            returnApply.setHandleMan(statusParam.getHandleMan());
+            returnApply.setHandleMan(getCurrentAdminUsername());
             returnApply.setHandleNote(statusParam.getHandleNote());
         } else if (status.equals(2)) {
             //完成退货：确认收到退货后，先调用支付宝原路退款，退款成功才更新状态
@@ -95,19 +100,27 @@ public class OmsOrderReturnApplyServiceImpl extends ServiceImpl<OmsOrderReturnAp
             returnApply.setId(id);
             returnApply.setStatus(2);
             returnApply.setReceiveTime(LocalDateTime.now());
-            returnApply.setReceiveMan(statusParam.getReceiveMan());
+            returnApply.setReceiveMan(getCurrentAdminUsername());
             returnApply.setReceiveNote(statusParam.getReceiveNote());
         } else if (status.equals(3)) {
             //拒绝退货
             returnApply.setId(id);
             returnApply.setStatus(3);
             returnApply.setHandleTime(LocalDateTime.now());
-            returnApply.setHandleMan(statusParam.getHandleMan());
+            returnApply.setHandleMan(getCurrentAdminUsername());
             returnApply.setHandleNote(statusParam.getHandleNote());
         } else {
             return 0;
         }
         return baseMapper.updateById(returnApply);
+    }
+
+    /**
+     * 获取当前登录管理员用户名（JWT过滤器已写入SecurityContext），
+     * 处理人/收货人一律以登录态为准，不允许前端伪造
+     */
+    private String getCurrentAdminUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     /**
