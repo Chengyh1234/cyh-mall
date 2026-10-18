@@ -1,10 +1,12 @@
 package com.macro.mall.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
+import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.dto.OssCallbackParam;
 import com.macro.mall.dto.OssCallbackResult;
 import com.macro.mall.dto.OssPolicyResult;
@@ -31,8 +33,10 @@ public class OssServiceImpl implements OssService {
 	private int ALIYUN_OSS_EXPIRE;
 	@Value("${aliyun.oss.maxSize}")
 	private int ALIYUN_OSS_MAX_SIZE;
-	@Value("${aliyun.oss.callback}")
+	@Value("${aliyun.oss.callback.url}")
 	private String ALIYUN_OSS_CALLBACK;
+	@Value("${aliyun.oss.callback.enabled:false}")
+	private boolean ALIYUN_OSS_CALLBACK_ENABLED;
 	@Value("${aliyun.oss.bucketName}")
 	private String ALIYUN_OSS_BUCKET_NAME;
 	@Value("${aliyun.oss.endpoint}")
@@ -72,13 +76,15 @@ public class OssServiceImpl implements OssService {
 			byte[] binaryData = postPolicy.getBytes("utf-8");
 			String policy = BinaryUtil.toBase64String(binaryData);
 			String signature = ossClient.calculatePostSignature(postPolicy);
-			String callbackData = BinaryUtil.toBase64String(JSONUtil.parse(callback).toString().getBytes("utf-8"));
 			// 返回结果
 			result.setAccessKeyId(ossClient.getCredentialsProvider().getCredentials().getAccessKeyId());
 			result.setPolicy(policy);
 			result.setSignature(signature);
 			result.setDir(dir);
-			result.setCallback(callbackData);
+			// 回调开关：关闭时不下发 callback，OSS 直传后不回调本地服务
+			if (ALIYUN_OSS_CALLBACK_ENABLED && StrUtil.isNotEmpty(ALIYUN_OSS_CALLBACK)) {
+				result.setCallback(BinaryUtil.toBase64String(JSONUtil.parse(callback).toString().getBytes("utf-8")));
+			}
 			result.setHost(action);
 		} catch (Exception e) {
 			LOGGER.error("签名生成失败", e);
@@ -97,6 +103,24 @@ public class OssServiceImpl implements OssService {
 		result.setWidth(request.getParameter("width"));
 		result.setHeight(request.getParameter("height"));
 		return result;
+	}
+
+	@Override
+	public void delete(String url) {
+		if (StrUtil.isBlank(url)) {
+			Asserts.fail("待删除的文件地址不能为空");
+		}
+		// 从直传返回的完整URL中提取objectName（兼容传入纯objectName）
+		String hostPrefix = "http://" + ALIYUN_OSS_BUCKET_NAME + "." + ALIYUN_OSS_ENDPOINT + "/";
+		String objectName = url;
+		if (url.startsWith(hostPrefix)) {
+			objectName = url.substring(hostPrefix.length());
+		}
+		// 安全校验：仅允许删除上传目录（dir.prefix）下的文件，防止任意文件删除
+		if (!objectName.startsWith(ALIYUN_OSS_DIR_PREFIX)) {
+			Asserts.fail("非法的文件地址");
+		}
+		ossClient.deleteObject(ALIYUN_OSS_BUCKET_NAME, objectName);
 	}
 
 }

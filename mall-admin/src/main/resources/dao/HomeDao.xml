@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.macro.mall.dao.HomeDao">
+    <select id="countOrderByTimeRange" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM oms_order
+        WHERE delete_status = 0
+          AND create_time &gt;= #{startDate}
+          AND create_time &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+    </select>
+    <select id="sumOrderAmountByTimeRange" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(pay_amount), 0)
+        FROM oms_order
+        WHERE delete_status = 0
+          AND create_time &gt;= #{startDate}
+          AND create_time &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+    </select>
+    <select id="countOrderByStatus" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM oms_order
+        WHERE delete_status = 0
+          AND `status` = #{status}
+    </select>
+    <select id="countReturnApplyByStatus" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM oms_order_return_apply
+        WHERE `status` = #{status}
+    </select>
+    <select id="countExpiringAdvertise" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM sms_home_advertise
+        WHERE status = 1
+          AND end_time IS NOT NULL
+          AND end_time &lt; DATE_ADD(NOW(), INTERVAL 15 DAY)
+    </select>
+    <select id="countProductOverview" resultType="com.macro.mall.dto.HomeStatisticResult">
+        SELECT
+            SUM(CASE WHEN delete_status = 0 AND publish_status = 0 THEN 1 ELSE 0 END) AS offShelfCount,
+            SUM(CASE WHEN delete_status = 0 AND publish_status = 1 THEN 1 ELSE 0 END) AS onShelfCount,
+            SUM(CASE WHEN delete_status = 0 AND COALESCE(low_stock, 0) &gt; 0 AND stock &lt;= low_stock THEN 1 ELSE 0 END) AS lowStockCount,
+            SUM(CASE WHEN delete_status = 0 THEN 1 ELSE 0 END) AS productCount
+        FROM pms_product
+    </select>
+    <select id="countMemberOverview" resultType="com.macro.mall.dto.HomeStatisticResult">
+        SELECT
+            SUM(CASE WHEN create_time &gt;= #{todayStart} AND create_time &lt; DATE_ADD(#{todayStart}, INTERVAL 1 DAY) THEN 1 ELSE 0 END) AS memberTodayAdd,
+            SUM(CASE WHEN create_time &gt;= #{yesterdayStart} AND create_time &lt; #{todayStart} THEN 1 ELSE 0 END) AS memberYesterdayAdd,
+            SUM(CASE WHEN create_time &gt;= #{monthStart} THEN 1 ELSE 0 END) AS memberMonthAdd,
+            COUNT(*) AS memberCount
+        FROM ums_member
+    </select>
+    <select id="listOrderTrend" resultType="com.macro.mall.dto.OrderTrendResult">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*) AS orderCount,
+            IFNULL(SUM(pay_amount), 0) AS orderAmount
+        FROM oms_order
+        WHERE delete_status = 0
+          AND create_time &gt;= #{startDate}
+          AND create_time &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+</mapper>

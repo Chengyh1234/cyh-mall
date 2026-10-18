@@ -18,4 +18,8 @@ public interface OssService {
      * Oss上传成功回调
      */
     OssCallbackResult callback(HttpServletRequest request);
+    /**
+     * Oss文件删除（传入直传后返回的完整URL）
+     */
+    void delete(String url);
 }

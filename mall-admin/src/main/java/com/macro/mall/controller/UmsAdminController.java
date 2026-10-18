@@ -97,6 +97,9 @@ public class UmsAdminController {
         data.put("username", umsAdmin.getUsername());
         data.put("menus", roleService.getMenuList(umsAdmin.getId()));
         data.put("icon", umsAdmin.getIcon());
+        data.put("nickName", umsAdmin.getNickName());
+        data.put("email", umsAdmin.getEmail());
+        data.put("note", umsAdmin.getNote());
         List<UmsRole> roleList = adminService.getRoleList(umsAdmin.getId());
         if(CollUtil.isNotEmpty(roleList)){
             List<String> roles = roleList.stream().map(UmsRole::getName).collect(Collectors.toList());
@@ -183,6 +186,31 @@ public class UmsAdminController {
         }
         return CommonResult.failed();
     }
+    @Operation(summary = "修改当前登录用户个人信息")
+    @RequestMapping(value = "/updateSelf", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult updateSelf(Principal principal, @RequestBody UmsAdmin admin) {
+        if (principal == null) {
+            return CommonResult.unauthorized(null);
+        }
+        String username = principal.getName();
+        UmsAdmin umsAdmin = adminService.getAdminByUsername(username);
+        if (umsAdmin == null) {
+            return CommonResult.failed("找不到当前登录用户");
+        }
+        // 仅允许修改头像、昵称、邮箱、备注，防止越权修改账号、密码、状态等
+        UmsAdmin updateInfo = new UmsAdmin();
+        updateInfo.setIcon(admin.getIcon());
+        updateInfo.setNickName(admin.getNickName());
+        updateInfo.setEmail(admin.getEmail());
+        updateInfo.setNote(admin.getNote());
+        int count = adminService.update(umsAdmin.getId(), updateInfo);
+        if (count > 0) {
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
+
 
     @Operation(summary = "给用户分配角色")
     @RequestMapping(value = "/role/update", method = RequestMethod.POST)
