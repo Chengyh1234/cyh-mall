@@ -9,5 +9,6 @@ target/
 .settings/
 .classpath
 .project
+./.trae
 
 **/application-dev.yml
