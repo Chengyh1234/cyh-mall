@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:mysql://db:3306/mall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: reader
+    url: jdbc:mysql://192.168.31.128:3306/mall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
     password: 123456
     druid:
       initial-size: 5 #连接池初始化大小
@@ -14,30 +14,57 @@ spring:
         login-password: druid
   data:
     redis:
-      host: redis # Redis服务器地址
+      host: 192.168.31.128 # Redis服务器地址
       database: 0 # Redis数据库索引（默认为0）
       port: 6379 # Redis服务器连接端口
       password: # Redis服务器连接密码（默认为空）
       timeout: 300ms # 连接超时时间（毫秒）
+
   rabbitmq:
-    host: rabbit # RabbitMQ服务器地址
+    host: 192.168.31.128
     port: 5672
     virtual-host: /mall
-    username: mall
-    password: mall
+    username: admin
+    password: admin
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 minio:
-  endpoint: http://192.168.3.101:9090 #MinIO服务所在地址
+  endpoint: http://localhost:9000 #MinIO服务所在地址
   bucketName: mall #存储桶名称
   accessKey: minioadmin #访问的key
   secretKey: minioadmin #访问的秘钥
 
 logging:
-  file:
-    path: /var/logs
   level:
     root: info
-    com.macro.mall: info
+    com.macro.mall: debug
 
 logstash:
-  host: logstash
+  host: localhost
+  enableInnerLog: false
+
+# ==================== 支付宝支付配置（订单退款，与mall-portal共用同一套应用） ====================
+alipay:
+  gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+  appId: xxx
+  alipayPublicKey: xxx
+  appPrivateKey: xxx
+  returnUrl: http://localhost:5173/#/pages/money/paySuccess
+  notifyUrl: xxx
+
+aliyun:
+  oss:
+    endpoint: xxx # oss对外服务的访问域名
+    accessKeyId: xxx # 访问身份验证中用到用户标识
+    accessKeySecret: xxx # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
+    bucketName: xxx # oss的存储空间
+    policy:
+      expire: 300 # 签名有效期(S)
+    maxSize: 10 # 上传文件大小(M)
+    callback:
+      url: http://localhost:8080/aliyun/oss/callback # 文件上传成功后的回调地址
+      enabled: false # 是否开启上传回调，本地调试设 false（OSS 无法回调本地），线上设为 true
+    dir:
+      prefix: mall/images/ # 上传文件夹路径前缀
