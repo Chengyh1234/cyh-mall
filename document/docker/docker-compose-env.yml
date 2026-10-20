@@ -6,7 +6,7 @@ services:
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root #设置root帐号密码
+      MYSQL_ROOT_PASSWORD: 123456 #设置root帐号密码
     ports:
       - 3306:3306
     volumes:
@@ -33,6 +33,10 @@ services:
   rabbitmq:
     image: rabbitmq:3.9.11-management
     container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin #默认账号
+      RABBITMQ_DEFAULT_PASS: admin #默认密码
+      RABBITMQ_DEFAULT_VHOST: /mall #默认虚拟主机
     volumes:
       - /mydata/rabbitmq/data:/var/lib/rabbitmq #数据文件目录挂载
     ports:
@@ -81,6 +85,9 @@ services:
   mongo:
     image: mongo:4
     container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin #root账号
+      MONGO_INITDB_ROOT_PASSWORD: 123456 #root密码
     volumes:
       - /mydata/mongo/db:/data/db #数据文件目录挂载
     ports:
@@ -95,5 +102,5 @@ services:
       - "MINIO_ROOT_USER=minioadmin"
       - "MINIO_ROOT_PASSWORD=minioadmin"
     ports:
-      - 9090:9000
+      - 9000:9000
       - 9001:9001

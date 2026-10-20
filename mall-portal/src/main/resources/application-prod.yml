@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://192.168.31.128:3306/mall?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://localhost:3306/mall?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     druid:
@@ -17,21 +17,21 @@ spring:
         login-password: druid
   data:
     mongodb:
-      uri: mongodb://admin:123456@192.168.31.128:27017/mall-port?authSource=admin
-    #      host: 192.168.31.128
+      uri: mongodb://admin:123456@localhost:27017/mall-port?authSource=admin
+    #      host: localhost
     #      port: 27017
     #      database: mall-port
     #      username: admin
     #      password: 123456
     #      authentication-database: admin
     redis:
-      host: 192.168.31.128 # Redis服务器地址
+      host: localhost # Redis服务器地址
       database: 0 # Redis数据库索引（默认为0）
       port: 6379 # Redis服务器连接端口
       password: # Redis服务器连接密码（默认为空）
       timeout: 300ms # 连接超时时间（毫秒）
   rabbitmq:
-    host: 192.168.31.128
+    host: localhost
     port: 5672
     virtual-host: /mall
     username: admin
@@ -51,9 +51,9 @@ logstash:
 
 alipay:
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
-  appId: 0
-  alipayPublicKey:
-  appPrivateKey:
+  appId: xxx
+  alipayPublicKey: xxx
+  appPrivateKey: xxx
   returnUrl: http://localhost:5173/#/pages/money/paySuccess
   notifyUrl:
 
@@ -61,18 +61,18 @@ alipay:
 # 使用号码认证服务(dypnsapi)的短信验证码能力，验证码由阿里云生成，业务侧自行校验
 aliyun:
   sms:
-    access-key-id: ${ALIYUN_SMS_ACCESS_KEY_ID:xxx}      # 请替换为你的 AccessKeyId（推荐环境变量注入）
-    access-key-secret: ${ALIYUN_SMS_ACCESS_KEY_SECRET:xxx}  # 请替换为你的 AccessKeySecret
-    scheme-name: xxx     # 阿里云控制台创建的方案名
-    sign-name: xxx        # 短信签名
+    access-key-id: ${ALIYUN_SMS_ACCESS_KEY_ID:}      # 请通过环境变量注入你的 AccessKeyId
+    access-key-secret: ${ALIYUN_SMS_ACCESS_KEY_SECRET:}  # 请通过环境变量注入你的 AccessKeySecret
+    scheme-name: cyh-mall      # 阿里云控制台创建的方案名
+    sign-name: 恒创联众        # 短信签名
     template-code: 100001      # 短信模板 ID（改成你自己的模板）
     country-code: "86"         # 国家码
   # ==================== 阿里云OSS对象存储配置 ====================
   oss:
-    endpoint: xxx # oss对外服务的访问域名
+    endpoint: oss-cn-beijing.aliyuncs.com # oss对外服务的访问域名
     accessKeyId: xxx # 访问身份验证中用到用户标识
     accessKeySecret: xxx # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
-    bucketName: xxx # oss的存储空间
+    bucketName: mall-oss-cyh # oss的存储空间
     policy:
       expire: 300 # 签名有效期(S)
     maxSize: 10 # 上传文件大小(M)
